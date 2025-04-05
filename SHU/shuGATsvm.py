@@ -5,19 +5,20 @@ from scipy.io import loadmat
 import scipy.signal as sig
 import networkx as nx
 import torch
-from torch_geometric.data import Data
-from scipy.signal import butter, filtfilt
+import torch.nn as nn
+import torch.nn.functional as F
+from torch_geometric.data import Data, DataLoader
+from torch_geometric.nn import GATv2Conv, global_mean_pool, GraphNorm
 from torch_geometric.seed import seed_everything
+import matplotlib.pyplot as plt
 
 # ---------------------------
 # Set Seed for Reproducibility
 # ---------------------------
 seed_everything(12345)
 
-
-
 # ---------------------------
-# Data Loading and Preprocessing
+# Data Loading and Preprocessing (SHU Dataset)
 # ---------------------------
 directory = r'C:\Users\uceerjp\Desktop\PhD\Multi-session Data\SHU Dataset\MatFiles'
 data_by_subject = {}
@@ -28,7 +29,6 @@ for filename in os.listdir(directory):
         mat_data = loadmat(file_path)
         parts = filename.split('_')
         subject_id = parts[0]  # e.g., 'sub-001'
-        # session_id = parts[1]  # Not used anymore
         if subject_id not in data_by_subject:
             data_by_subject[subject_id] = {'data': [], 'labels': []}
         data = mat_data['data']      # Adjust key as needed
@@ -73,6 +73,7 @@ def bandpass_filter_trials(data_split, low_freq, high_freq, sfreq):
     nyquist = 0.5 * sfreq
     low = low_freq / nyquist
     high = high_freq / nyquist
+    from scipy.signal import butter, filtfilt
     b, a = butter(N=4, Wn=[low, high], btype='band')
     for subject in data_split:
         subject_data = data_split[subject]
@@ -95,7 +96,6 @@ filtered_data_split = bandpass_filter_trials(data_split, low_freq=8, high_freq=3
 # ---------------------------
 # Merge Left and Right Trials per Subject
 # ---------------------------
-# For each subject, combine L and R trials into one dataset and create corresponding labels.
 merged_data = {}
 for subject in filtered_data_split:
     left_trials = filtered_data_split[subject]['L']
@@ -151,7 +151,7 @@ def create_graphs_and_edges(plv_matrices, threshold):
     return adj_matrices, edge_indices, graphs
 
 def compute_plv(subject_data):
-    data = subject_data['data']  # Trials x Channels x TimeSteps
+    data = subject_data['data']  # Trials x Channels x Samples
     labels = subject_data['label']  # Trials,
     numTrials, numElectrodes, _ = data.shape
     plv_matrices = np.zeros((numElectrodes, numElectrodes, numTrials))
@@ -162,10 +162,8 @@ def compute_plv(subject_data):
         plv_matrices[:, :, trial_idx] = plvfcn(eeg_trial)
         
     label_tensor = torch.tensor(labels, dtype=torch.long)
-    # Set your desired threshold (e.g., 0.1)
+    # Set threshold (e.g., 0)
     adj_matrices, edge_indices, graphs = create_graphs_and_edges(plv_matrices, threshold=0)
-    
-    # Return a dictionary with the computed data for this subject
     return {
         'plv_matrices': plv_matrices,
         'labels': label_tensor,
@@ -174,342 +172,140 @@ def compute_plv(subject_data):
         'graphs': graphs
     }
 
-# Process each subject
 subject_plv_data = {}
 for subject_id, subject_data in merged_data.items():
     print(f"Processing subject: {subject_id}")
     subject_plv_data[subject_id] = compute_plv(subject_data)
 
-# subject_plv_data now contains the PLV matrices, graph data, and labels for each subject.
-
-#%% Apply GAT model
-
-from torch_geometric.data import Data
-import torch
-
+# ---------------------------
+# Build PyG Data Objects for GAT
+# ---------------------------
 all_data = []
-
 for subject_key, subject_data in subject_plv_data.items():
     subject_int = int(subject_key.strip('sub-'))
-    plv_matrices = subject_data['plv_matrices']  
+    plv_matrices = subject_data['plv_matrices']
     labels = subject_data['labels']
     edge_indices = subject_data['edge_indices']
-    
     num_trials = plv_matrices.shape[2]
-    
     for i in range(num_trials):
-        # Convert the adjacency matrix (node features) to a torch tensor.
-        x = torch.tensor(plv_matrices[:, :, i], dtype=torch.float)  # Shape: [32, 32]
-        
+        x = torch.tensor(plv_matrices[:, :, i], dtype=torch.float)  # Node features from the adjacency matrix.
+        # Use edge_indices; if list, then index it, else assume proper tensor.
         if isinstance(edge_indices, list):
             edge_index = edge_indices[i]
         else:
             edge_index = edge_indices[:, :, i]
-        
-        # Make sure the label is a torch tensor
         y = torch.tensor(labels[i], dtype=torch.long) if not torch.is_tensor(labels) else labels[i]
-        
         data = Data(x=x, edge_index=edge_index, y=y)
-        data.subject = torch.tensor(subject_int, dtype=torch.long)
+        data.subject = int(subject_int)
         all_data.append(data)
 
-#%%
-
-# --- Define the Simple GAT Model with MMD Loss ---
-import torch.nn.functional as F
-from torch_geometric.nn import GATv2Conv, GraphNorm, global_mean_pool
-from torch import nn
-from torch_geometric.data import Data, DataLoader
+# ---------------------------
+# LOSO Split Function
+# ---------------------------
+def split_data_by_subject(data_list, test_subject):
+    train_data = [d for d in data_list if d.subject != test_subject]
+    test_data  = [d for d in data_list if d.subject == test_subject]
+    return train_data, test_data
 
 # ---------------------------
-# Define the Simple GAT Model with MMD
+# Define the Simple GAT Model (Feature Extractor and Classifier)
 # ---------------------------
 class SimpleGAT(nn.Module):
-    def __init__(self, in_channels, hidden_channels, out_channels, num_heads=1):
+    def __init__(self, in_channels, hidden_channels, out_channels, num_heads):
         super(SimpleGAT, self).__init__()
-        self.conv1 = GATv2Conv(in_channels, hidden_channels, heads=num_heads, concat=True)
-        self.conv2 = GATv2Conv(hidden_channels * num_heads, hidden_channels, heads=num_heads, concat=True)
-        self.conv3 = GATv2Conv(hidden_channels * num_heads, hidden_channels, heads=num_heads, concat=True)
+        # First GAT layer: maps from in_channels to 64 features per head,
+        # with concatenation output dimension 64*num_heads.
+        self.conv1 = GATv2Conv(in_channels, 32, heads=num_heads, concat=True)
+        self.gn1 = GraphNorm(32 * num_heads)
         
-        self.gn1 = GraphNorm(hidden_channels * num_heads)
-        self.gn2 = GraphNorm(hidden_channels * num_heads)
-        self.gn3 = GraphNorm(hidden_channels * num_heads)
+        # Second GAT layer: maps from 64*num_heads to 32 features per head,
+        # with concatenation output dimension 32*num_heads.
+        self.conv2 = GATv2Conv(32 * num_heads, 16, heads=num_heads, concat=True)
+        self.gn2 = GraphNorm(16 * num_heads)
         
-        self.lin = nn.Linear(hidden_channels, out_channels)
+        # Third GAT layer: maps from 32*num_heads to 8 features,
+        # using averaging over heads (concat=False) to yield a feature vector of dimension 8.
+        self.conv3 = GATv2Conv(16 * num_heads, 8, heads=num_heads, concat=False)
+        self.gn3 = GraphNorm(8)
+        
+        # Final linear layer: maps the 8-dimensional representation to out_channels (number of classes)
+        self.lin = nn.Linear(8, out_channels)
     
     def forward(self, data):
         x, edge_index, batch = data.x, data.edge_index, data.batch
-        # Each convolution is followed by graph normalization and ReLU.
+        
         x = F.relu(self.gn1(self.conv1(x, edge_index)))
         x = F.relu(self.gn2(self.conv2(x, edge_index)))
         x = F.relu(self.gn3(self.conv3(x, edge_index)))
         
-        # Global mean pooling to obtain graph-level features.
-        x = global_mean_pool(x, batch)  # shape: [num_graphs, hidden_channels * num_heads]
-        features = x  # These features can be used for dimensionality reduction.
-        logits = self.lin(x)  # Classification logits (for left/right).
+        # Global mean pooling to produce graph-level representation.
+        x = global_mean_pool(x, batch)
+        features = x  # Extracted features.
+        logits = self.lin(x)
         return logits, features
 
-# --- Define the MMD Loss Functions ---
-def gaussian_kernel(source, target, kernel_mul=2.0, kernel_num=5, fix_sigma=None):
-    n_samples = int(source.size(0)) + int(target.size(0))
-    total = torch.cat([source, target], dim=0)
-    
-    total0 = total.unsqueeze(0).expand(total.size(0), total.size(0), total.size(1))
-    total1 = total.unsqueeze(1).expand(total.size(0), total.size(0), total.size(1))
-    L2_distance = ((total0 - total1) ** 2).sum(2)
-    
-    if fix_sigma:
-        bandwidth = fix_sigma
-    else:
-        bandwidth = torch.sum(L2_distance.data) / (n_samples ** 2 - n_samples)
-    bandwidth /= kernel_mul ** (kernel_num // 2)
-    bandwidth_list = [bandwidth * (kernel_mul ** i) for i in range(kernel_num)]
-    kernel_val = [torch.exp(-L2_distance / bandwidth_temp) for bandwidth_temp in bandwidth_list]
-    return torch.stack(kernel_val, dim=0).sum(dim=0) # [n_samples, n_samples]
-
-def mmd_loss(source, target, kernel_mul=2.0, kernel_num=5, fix_sigma=None):
-    batch_size_source = source.size(0)
-    batch_size_target = target.size(0)
-    kernels = gaussian_kernel(source, target, kernel_mul, kernel_num, fix_sigma)
-    XX = kernels[:batch_size_source, :batch_size_source]
-    YY = kernels[batch_size_source:, batch_size_source:]
-    XY = kernels[:batch_size_source, batch_size_source:]
-    YX = kernels[batch_size_source:, :batch_size_source]
-    loss = torch.mean(XX) + torch.mean(YY) - 2 * torch.mean(XY)
-    return loss
-
-# For a batch, we compute the pairwise MMD between features of different subjects.
-def compute_batch_mmd(features, subjects):
-    unique_subjects = torch.unique(subjects)
-    loss = 0
-    count = 0
-    for i in range(len(unique_subjects)):
-        for j in range(i+1, len(unique_subjects)):
-            subj_i = unique_subjects[i]
-            subj_j = unique_subjects[j]
-            feat_i = features[subjects == subj_i]
-            feat_j = features[subjects == subj_j]
-            if feat_i.size(0) > 0 and feat_j.size(0) > 0:
-                loss += mmd_loss(feat_i, feat_j)
-                count += 1
-    if count > 0:
-        loss /= count
-    return loss
-
-# --- Training Setup ---
+# ---------------------------
+# LOSO Pipeline: Train GAT and Evaluate at Each Epoch
+# ---------------------------
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-loader = DataLoader(all_data, batch_size=32, shuffle=True)
-
-# Here in_channels should match the number of node features.
-# In our case, since we used each row of the adjacency matrix and our adjacencies are square matrices of size [num_nodes, num_nodes],
-# in_channels equals num_nodes. For example, if num_nodes is 19, then in_channels=19.
-in_channels = all_data[0].x.shape[1]  # e.g., 19
-hidden_channels = 32
-num_classes = 2  # For left (0) vs. right (1)
-
-model = SimpleGAT(in_channels, hidden_channels, num_classes).to(device)
-optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
-criterion = nn.CrossEntropyLoss()
-
 num_epochs = 100
-lambda_mmd = 0.5  # Weight for MMD loss
 
-model.train()
-for epoch in range(num_epochs):
-    total_loss = 0
-    for batch in loader:
-        batch = batch.to(device)
-        optimizer.zero_grad()
-        logits, feats = model(batch)
-        loss_cls = criterion(logits, batch.y)
-        subjects = batch.subject.to(device)
-        loss_mmd = compute_batch_mmd(feats, subjects)
-        # Uncomment the line below if you wish to include the MMD loss:
-        # loss = loss_cls + lambda_mmd * loss_mmd
-        loss = loss_cls
-        loss.backward()
-        optimizer.step()
-        total_loss += loss.item()
-    print(f"Epoch {epoch+1}/{num_epochs}, Loss: {total_loss/len(loader):.4f}")
+loso_results = {}
 
-# --- Feature Extraction for Dimensionality Reduction ---
-model.eval()
-all_feats = []
-all_labels = []
-all_subjects = []
-with torch.no_grad():
-    for batch in loader:
-        batch = batch.to(device)
-        logits, feats = model(batch)
-        all_feats.append(feats.cpu())
-        all_labels.append(batch.y.cpu())
-        all_subjects.append(batch.subject.cpu())
-all_feats = torch.cat(all_feats, dim=0).numpy()
-all_labels = torch.cat(all_labels, dim=0).numpy()
-all_subjects = torch.cat(all_subjects, dim=0).numpy()
-
-#%%
-## %matplotlib qt
-
-import matplotlib.pyplot as plt
-import numpy as np
-from sklearn.decomposition import PCA
-from sklearn.manifold import TSNE
-from mpl_toolkits.mplot3d import Axes3D  # Needed for 3D plotting
-import matplotlib.cm as cm
-
-def plot_3d_embedding(embedding, title, mode='class'):
-    """
-    Plots a 3D scatter plot for the provided embedding.
+for test_subject in sorted([int(s.strip('sub-')) for s in subject_plv_data.keys()]):
+    print(f"\n=== LOSO Fold: Test Subject {test_subject} ===")
+    train_data, test_data = split_data_by_subject(all_data, test_subject)
     
-    mode: 'class' colors by left/right only,
-          'subject' colors by subject and uses different markers for left/right.
-    """
-    fig = plt.figure(figsize=(10, 8))
-    ax = fig.add_subplot(111, projection='3d')
+    train_loader = DataLoader(train_data, batch_size=32, shuffle=True)
+    test_loader  = DataLoader(test_data, batch_size=32, shuffle=False)
     
-    if mode == 'class':
-        # Define two colors for left (0) and right (1)
-        colors = {0: 'blue', 1: 'red'}
-        marker = '.'  # Dot for both classes
-        for side in [0, 1]:
-            indices = np.where(all_labels == side)[0]
-            if indices.size > 0:
-                ax.scatter(embedding[indices, 0],
-                           embedding[indices, 1],
-                           embedding[indices, 2],
-                           color=colors[side],
-                           marker=marker,
-                           s=30,
-                           alpha=0.7,
-                           label='Left' if side == 0 else 'Right')
-    elif mode == 'subject':
-        # Get unique subjects and assign each a color from a colormap
-        unique_subjects = sorted(np.unique(all_subjects))
-        num_subjects = len(unique_subjects)
-        cmap = cm.get_cmap('tab10', num_subjects)
-        # Define markers: use circle for left (0) and triangle for right (1)
-        marker_dict = {0: 'o', 1: '^'}
-        for i, subj in enumerate(unique_subjects):
-            for side in [0, 1]:
-                indices = np.where((all_subjects == subj) & (all_labels == side))[0]
-                if indices.size > 0:
-                    ax.scatter(embedding[indices, 0],
-                               embedding[indices, 1],
-                               embedding[indices, 2],
-                               color=cmap(i),
-                               marker=marker_dict[side],
-                               edgecolor='k',
-                               s=30,
-                               alpha=0.7,
-                               label=f"S{subj} - {'Left' if side == 0 else 'Right'}")
+    model = SimpleGAT(in_channels=all_data[0].x.shape[1], hidden_channels=32, out_channels=2, num_heads=8).to(device)
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+    criterion = nn.CrossEntropyLoss()
     
-    ax.set_title(title)
-    ax.set_xlabel('Dimension 1')
-    ax.set_ylabel('Dimension 2')
-    ax.set_zlabel('Dimension 3')
-    
-    # Remove duplicate labels in the legend
-    handles, labels = ax.get_legend_handles_labels()
-    unique_legend = dict(zip(labels, handles))
-    ax.legend(unique_legend.values(), unique_legend.keys(), loc='best', fontsize='small')
-    plt.show()
-
-# Compute 3D PCA embedding only once
-pca = PCA(n_components=3)
-features_pca = pca.fit_transform(all_feats)
-
-# Compute 3D t-SNE embedding only once
-tsne = TSNE(n_components=3, random_state=12345, verbose=1)
-features_tsne = tsne.fit_transform(all_feats)
-
-# Plot 3D PCA using left/right color scheme
-plot_3d_embedding(features_pca, '3D PCA of GAT Features (Left/Right Only)', mode='class')
-
-# Plot 3D t-SNE using left/right color scheme
-plot_3d_embedding(features_tsne, '3D t-SNE of GAT Features (Left/Right Only)', mode='class')
-
-# Plot 3D PCA using subject-based color scheme
-plot_3d_embedding(features_pca, '3D PCA of GAT Features (Subject & Class)', mode='subject')
-
-# Plot 3D t-SNE using subject-based color scheme
-plot_3d_embedding(features_tsne, '3D t-SNE of GAT Features (Subject & Class)', mode='subject')
-
-
-#%% Optimisation:
-import numpy as np
-from sklearn.svm import SVC
-from sklearn.metrics import accuracy_score, classification_report
-from sklearn.preprocessing import StandardScaler
-from sklearn.pipeline import Pipeline
-import itertools
-
-# Hyperparameter grid
-param_grid = {
-    'kernel': ['rbf', 'linear'],
-    'C': [0.1, 1, 10],
-    'gamma': ['scale', 0.001, 0.01, 0.1, 1]
-}
-
-# Dictionary to store results for each test subject
-all_results = {}
-
-# Loop over test subjects from 1 to 25
-for test_subject in range(1, 26):
-    # Split the data based on subject membership
-    train_indices = np.where(all_subjects != test_subject)[0]
-    test_indices = np.where(all_subjects == test_subject)[0]
-    
-    X_train = all_feats[train_indices]
-    y_train = all_labels[train_indices]
-    X_test = all_feats[test_indices]
-    y_test = all_labels[test_indices]
-    
-    print(f"\nTesting on subject {test_subject}")
-    print(f"Training on {len(X_train)} samples from subjects: {np.unique(all_subjects[train_indices])}")
-    print(f"Testing on {len(X_test)} samples from subject: {test_subject}")
-    
-    best_params = None
     best_test_acc = 0
-    results = []
+    best_epoch = 0
     
-    # Iterate over all combinations of hyperparameters
-    for kernel, C, gamma in itertools.product(param_grid['kernel'], param_grid['C'], param_grid['gamma']):
-        # Create a pipeline with StandardScaler and SVC using current hyperparameters
-        pipeline = Pipeline([
-            ('scaler', StandardScaler()),
-            ('svm', SVC(kernel=kernel, C=C, gamma=gamma, random_state=12345))
-        ])
-        pipeline.fit(X_train, y_train)
-        y_pred = pipeline.predict(X_test)
-        acc = accuracy_score(y_test, y_pred)
-        results.append((kernel, C, gamma, acc))
-        print(f"Params: kernel={kernel}, C={C}, gamma={gamma}, Test Accuracy: {acc*100:.2f}%")
+    for epoch in range(num_epochs):
+        model.train()
+        total_loss = 0
+        for batch in train_loader:
+            batch = batch.to(device)
+            optimizer.zero_grad()
+            logits, _ = model(batch)
+            loss = criterion(logits, batch.y)
+            loss.backward()
+            optimizer.step()
+            total_loss += loss.item()
+        avg_loss = total_loss / len(train_loader)
         
-        if acc > best_test_acc:
-            best_test_acc = acc
-            best_params = {'kernel': kernel, 'C': C, 'gamma': gamma}
+        # Evaluate on test set at this epoch.
+        model.eval()
+        correct = 0
+        total = 0
+        with torch.no_grad():
+            for batch in test_loader:
+                batch = batch.to(device)
+                logits, _ = model(batch)
+                preds = logits.argmax(dim=1)
+                correct += (preds == batch.y).sum().item()
+                total += batch.num_graphs
+        test_acc = correct / total if total > 0 else 0
+        print(f"Test Subject {test_subject}, Epoch {epoch+1}/{num_epochs}, Loss: {avg_loss:.4f}, Test Acc: {test_acc*100:.2f}%")
+        
+        if test_acc > best_test_acc:
+            best_test_acc = test_acc
+            best_epoch = epoch + 1
     
-    print(f"\nBest Test Accuracy for subject {test_subject}: {best_test_acc*100:.2f}% with parameters: {best_params}")
-    
-    # Fit best model and print classification report
-    pipeline = Pipeline([
-        ('scaler', StandardScaler()),
-        ('svm', SVC(kernel=best_params['kernel'], C=best_params['C'], gamma=best_params['gamma'], random_state=12345))
-    ])
-    pipeline.fit(X_train, y_train)
-    y_pred_best = pipeline.predict(X_test)
-    report = classification_report(y_test, y_pred_best)
-    print(f"\nClassification Report for subject {test_subject}:\n{report}")
-    
-    # Save results for this subject
-    all_results[test_subject] = {'best_accuracy': best_test_acc,
-                                 'best_params': best_params,
-                                 'report': report,
-                                 'results': results}
+    print(f"Best Test Accuracy for Subject {test_subject}: {best_test_acc*100:.2f}% at Epoch {best_epoch}")
+    loso_results[test_subject] = (best_test_acc, best_epoch)
 
-# Optionally, you can print a summary of results for all subjects
-print("\nSummary of best accuracies for each test subject:")
-for subj in sorted(all_results.keys()):
-    print(f"Subject {subj}: {all_results[subj]['best_accuracy']*100:.2f}% with {all_results[subj]['best_params']}")
+# ---------------------------
+# Summary of LOSO Results
+# ---------------------------
+print("\nLOSO Summary (GAT Classification):")
+for subj, (acc, epoch) in sorted(loso_results.items()):
+    print(f"Subject {subj}: Best Test Accuracy = {acc*100:.2f}% at Epoch {epoch}")
+
+avg_acc = np.mean([acc for acc, _ in loso_results.values()])
+print(f"\nAverage Test Accuracy across LOSO folds: {avg_acc*100:.2f}%")

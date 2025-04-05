@@ -14,12 +14,72 @@ from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau, ModelCh
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.metrics import accuracy_score, classification_report
 
-# Instead of EEGNet, import your new model.
-# If HopefullNet is in the same file or another module, adjust the import accordingly.
-from YourNewModelModule import HopefullNet  # Ensure HopefullNet.out has Dense(2, activation='softmax')
-
 from torch_geometric.seed import seed_everything
 seed_everything(12345)
+
+fs= 256
+#%% New Model: HopefullNet (Modified to output 2 classes for binary classification)
+class HopefullNet(tf.keras.Model):
+    """
+    HopefullNet modified for binary classification.
+    Expected input shape: (640, 2)
+    """
+    def __init__(self, inp_shape=(640,2)):
+        super(HopefullNet, self).__init__()
+        self.inp_shape = inp_shape
+
+        self.kernel_size_0 = 20
+        self.kernel_size_1 = 6
+        self.drop_rate = 0.5
+
+        self.conv1 = tf.keras.layers.Conv1D(filters=32,
+                                            kernel_size=self.kernel_size_0,
+                                            activation='relu',
+                                            padding="same",
+                                            input_shape=self.inp_shape)
+        self.batch_n_1 = tf.keras.layers.BatchNormalization()
+        self.conv2 = tf.keras.layers.Conv1D(filters=32,
+                                            kernel_size=self.kernel_size_0,
+                                            activation='relu',
+                                            padding="valid")
+        self.batch_n_2 = tf.keras.layers.BatchNormalization()
+        self.spatial_drop_1 = tf.keras.layers.SpatialDropout1D(self.drop_rate)
+        self.conv3 = tf.keras.layers.Conv1D(filters=32,
+                                            kernel_size=self.kernel_size_1,
+                                            activation='relu',
+                                            padding="valid")
+        self.avg_pool1 = tf.keras.layers.AvgPool1D(pool_size=2)
+        self.conv4 = tf.keras.layers.Conv1D(filters=32,
+                                            kernel_size=self.kernel_size_1,
+                                            activation='relu',
+                                            padding="valid")
+        self.spatial_drop_2 = tf.keras.layers.SpatialDropout1D(self.drop_rate)
+        self.flat = tf.keras.layers.Flatten()
+        self.dense1 = tf.keras.layers.Dense(296, activation='relu')
+        self.dropout1 = tf.keras.layers.Dropout(self.drop_rate)
+        self.dense2 = tf.keras.layers.Dense(148, activation='relu')
+        self.dropout2 = tf.keras.layers.Dropout(self.drop_rate)
+        self.dense3 = tf.keras.layers.Dense(74, activation='relu')
+        self.dropout3 = tf.keras.layers.Dropout(self.drop_rate)
+        # Modified output layer for 2 classes instead of 5
+        self.out = tf.keras.layers.Dense(2, activation='softmax')
+
+    def call(self, input_tensor):
+        conv1 = self.conv1(input_tensor)
+        batch_n_1 = self.batch_n_1(conv1)
+        conv2 = self.conv2(batch_n_1)
+        batch_n_2 = self.batch_n_2(conv2)
+        spatial_drop_1 = self.spatial_drop_1(batch_n_2)
+        conv3 = self.conv3(spatial_drop_1)
+        avg_pool1 = self.avg_pool1(conv3)
+        conv4 = self.conv4(avg_pool1)
+        spatial_drop_2 = self.spatial_drop_2(conv4)
+        flat = self.flat(spatial_drop_2)
+        dense1 = self.dense1(flat)
+        dropout1 = self.dropout1(dense1)
+        dense2 = self.dense2(dropout1)
+        dropout2 = self.dropout2(dense2)
+        return self.out(dropout2)
 
 #%% Utility functions
 
@@ -41,7 +101,7 @@ def aggregate_eeg_data(S1, chunk_size=640):
       data: array of shape (trials, samples, channels)  e.g. (trials, 640, 2)
       labels: array of shape (trials,)
     """
-    numElectrodes = 2  # Now use only the first 2 electrodes
+    numElectrodes = 2  # Use only the first 2 electrodes
     data_list = []
     labels_list = []
 
@@ -72,7 +132,8 @@ def aggregate_eeg_data(S1, chunk_size=640):
     labels = np.array(labels_list)
     return data, labels
 
-def load_and_preprocess_subject(subject_number, data_dir, fs, chunk_duration_sec=640/fs):
+
+def load_and_preprocess_subject(subject_number, data_dir, fs=256, chunk_duration_sec=640/fs):
     """
     Loads a subject's data from a .mat file, applies bandpass filtering,
     and aggregates EEG data.
@@ -90,7 +151,7 @@ def load_and_preprocess_subject(subject_number, data_dir, fs, chunk_duration_sec
         for i in range(S1.shape[1]):
             S1[key][0, i] = bandpass(S1[key][0, i], [8, 30], fs)
     
-    chunk_size = int(fs * chunk_duration_sec)  # This should be 640 if fs and chunk_duration_sec are chosen appropriately.
+    chunk_size = int(fs * chunk_duration_sec)  # Should be 640 if fs and chunk_duration_sec are chosen appropriately.
     data, labels = aggregate_eeg_data(S1, chunk_size=chunk_size)
     
     # For HopefullNet, data should be (trials, samples, channels) with shape (trials, 640, 2)
@@ -138,13 +199,15 @@ for test_subject in subject_numbers:
     ram_before = get_ram_usage()
     
     # For HopefullNet, the expected input shape is (samples, channels) i.e. (640, 2)
-    inp_shape = (train_data.shape[1], train_data.shape[2])  # should be (640, 2)
+    inp_shape = (train_data.shape[1], train_data.shape[2])
     
     # Initialize HopefullNet
     model = HopefullNet(inp_shape=inp_shape)
+    model.build((None, inp_shape[0], inp_shape[1]))  # Build the model explicitly
     optimizer = Adam(learning_rate=0.001)
     model.compile(loss='categorical_crossentropy', optimizer=optimizer, metrics=['accuracy'])
-    
+    num_model_parameters = model.count_params()  # Now this works without error
+
     num_model_parameters = model.count_params()
     ram_after = get_ram_usage()
     ram_model_usage = ram_after - ram_before
