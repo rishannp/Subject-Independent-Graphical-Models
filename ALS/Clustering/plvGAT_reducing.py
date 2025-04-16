@@ -170,6 +170,40 @@ class SimpleGAT(nn.Module):
         logits = self.lin(x)
         return logits, features
 
+# class SimpleGAT(nn.Module): # With Dropout
+#     def __init__(self, in_channels, hidden_channels, out_channels, num_heads, dropout=0.3):
+#         super(SimpleGAT, self).__init__()
+#         self.dropout = dropout
+
+#         self.conv1 = GATv2Conv(in_channels, 32, heads=num_heads, concat=True, dropout=dropout)
+#         self.gn1 = GraphNorm(32 * num_heads)
+
+#         self.conv2 = GATv2Conv(32 * num_heads, 16, heads=num_heads, concat=True, dropout=dropout)
+#         self.gn2 = GraphNorm(16 * num_heads)
+
+#         self.conv3 = GATv2Conv(16 * num_heads, 8, heads=num_heads, concat=False, dropout=dropout)
+#         self.gn3 = GraphNorm(8)
+
+#         self.lin = nn.Linear(8, out_channels)
+
+#     def forward(self, data):
+#         x, edge_index, batch = data.x, data.edge_index, data.batch
+
+#         x = F.relu(self.gn1(self.conv1(x, edge_index)))
+#         x = F.dropout(x, p=self.dropout, training=self.training)
+
+#         x = F.relu(self.gn2(self.conv2(x, edge_index)))
+#         x = F.dropout(x, p=self.dropout, training=self.training)
+
+#         x = F.relu(self.gn3(self.conv3(x, edge_index)))
+#         x = F.dropout(x, p=self.dropout, training=self.training)
+
+#         x = global_mean_pool(x, batch)
+#         features = x
+#         logits = self.lin(x)
+#         return logits, features
+
+
 # ---------------------------
 # LOSO Pipeline: Train GAT and Evaluate at Each Epoch
 # ---------------------------
