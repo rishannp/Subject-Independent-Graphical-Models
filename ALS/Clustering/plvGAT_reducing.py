@@ -208,7 +208,7 @@ class SimpleGAT(nn.Module):
 # LOSO Pipeline: Train GAT and Evaluate at Each Epoch
 # ---------------------------
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu') #If we use the clusters
-num_epochs = 100
+num_epochs = 25
 loso_results = {}
 
 for test_subject in subject_numbers:
@@ -216,14 +216,14 @@ for test_subject in subject_numbers:
     train_data, test_data = split_data_by_subject(all_data, test_subject)
     
     train_loader = DataLoader(train_data, batch_size=32, shuffle=True)
-    test_loader  = DataLoader(test_data, batch_size=32, shuffle=False)
+    test_loader  = DataLoader(test_data,  batch_size=32, shuffle=False)
     
     model = SimpleGAT(in_channels=19, hidden_channels=32, out_channels=2, num_heads=8).to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
     criterion = nn.CrossEntropyLoss()
     
     best_test_acc = 0
-    best_epoch = 0
+    best_epoch    = 0
     
     for epoch in range(num_epochs):
         model.train()
@@ -241,24 +241,37 @@ for test_subject in subject_numbers:
         # Evaluate on test set at this epoch.
         model.eval()
         correct = 0
-        total = 0
+        total   = 0
         with torch.no_grad():
             for batch in test_loader:
                 batch = batch.to(device)
                 logits, _ = model(batch)
                 preds = logits.argmax(dim=1)
                 correct += (preds == batch.y).sum().item()
-                total += batch.num_graphs
+                total   += batch.num_graphs
         test_acc = correct / total if total > 0 else 0
         
-        print(f"Subject {test_subject}, Epoch {epoch+1}/{num_epochs}, Loss: {avg_loss:.4f}, Test Acc: {test_acc*100:.2f}%")
+        print(
+            f"Subject {test_subject}, "
+            f"Epoch {epoch+1}/{num_epochs}, "
+            f"Loss: {avg_loss:.4f}, "
+            f"Test Acc: {test_acc*100:.2f}%"
+        )
         
         if test_acc > best_test_acc:
             best_test_acc = test_acc
-            best_epoch = epoch + 1
+            best_epoch    = epoch + 1
     
-    print(f"Subject {test_subject} Best Test Accuracy: {best_test_acc*100:.2f}% at Epoch {best_epoch}")
-    loso_results[test_subject] = (best_test_acc, best_epoch)
+    print(
+        f"Subject {test_subject}, Last Epoch ({num_epochs}) "
+        f"Test Acc: {test_acc*100:.2f}%"
+    )
+    
+    print(
+        f"Subject {test_subject} Best Test Accuracy: "
+        f"{best_test_acc*100:.2f}% at Epoch {best_epoch}"
+    )
+    loso_results[test_subject] = (best_test_acc, best_epoch, test_acc)
 
 # ---------------------------
 # Summary of LOSO Results

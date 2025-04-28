@@ -1,0 +1,296 @@
+[START] Training at Sat 26 Apr 13:18:02 BST 2025 on GPU 8
+python: can't open file '/home/uceerjp/StiegerModel/EEGNet/ShallowConvNet_train.py': [Errno 2] No such file or directory
+[RESTART] Script crashed or ended at Sat 26 Apr 13:18:02 BST 2025, retrying in 60s...
+[START] Training at Sat 26 Apr 13:19:39 BST 2025 on GPU 8
+2025-04-26 13:19:40.033963: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2025-04-26 13:19:40.061921: E external/local_xla/xla/stream_executor/cuda/cuda_fft.cc:467] Unable to register cuFFT factory: Attempting to register factory for plugin cuFFT when one has already been registered
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+E0000 00:00:1745669980.095234 1334669 cuda_dnn.cc:8579] Unable to register cuDNN factory: Attempting to register factory for plugin cuDNN when one has already been registered
+E0000 00:00:1745669980.106130 1334669 cuda_blas.cc:1407] Unable to register cuBLAS factory: Attempting to register factory for plugin cuBLAS when one has already been registered
+W0000 00:00:1745669980.130234 1334669 computation_placer.cc:177] computation placer already registered. Please check linkage and avoid linking the same target more than once.
+W0000 00:00:1745669980.130277 1334669 computation_placer.cc:177] computation placer already registered. Please check linkage and avoid linking the same target more than once.
+W0000 00:00:1745669980.130290 1334669 computation_placer.cc:177] computation placer already registered. Please check linkage and avoid linking the same target more than once.
+W0000 00:00:1745669980.130303 1334669 computation_placer.cc:177] computation placer already registered. Please check linkage and avoid linking the same target more than once.
+2025-04-26 13:19:40.136685: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX512F AVX512_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+Host RAM: 502.84 GB total, 189.17 GB used
+Starting Script...
+Loading EEG trials dataset ...
+Loaded dataset with 18015 trials from subjects: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+[INFO] Minimum time length found: 5040
+[INFO] All trials cropped to minimum time length.
+
+===== LOSO Iteration: Test Subject 1 =====
+I0000 00:00:1745670261.795684 1334669 gpu_device.cc:2019] Created device /job:localhost/replica:0/task:0/device:GPU:0 with 503 MB memory:  -> device: 0, name: Tesla V100-PCIE-32GB, pci bus id: 0000:c2:00.0, compute capability: 7.0
+2025-04-26 13:24:51.167825: W external/local_xla/xla/tsl/framework/bfc_allocator.cc:501] Allocator (GPU_0_bfc) ran out of memory trying to allocate 19.92GiB (rounded to 21391130880)requested by op _EagerConst
+If the cause is memory fragmentation maybe the environment variable 'TF_GPU_ALLOCATOR=cuda_malloc_async' will improve the situation. 
+Current allocation summary follows.
+Current allocation summary follows.
+2025-04-26 13:24:51.167870: I external/local_xla/xla/tsl/framework/bfc_allocator.cc:1058] BFCAllocator dump for GPU_0_bfc
+2025-04-26 13:24:51.167881: I external/local_xla/xla/tsl/framework/bfc_allocator.cc:1065] Bin (256): 	Total Chunks: 0, Chunks in use: 0. 0B allocated for chunks. 0B in use in bin. 0B client-requested in use in bin.
+2025-04-26 13:24:51.167889: I external/local_xla/xla/tsl/framework/bfc_allocator.cc:1065] Bin (512): 	Total Chunks: 0, Chunks in use: 0. 0B allocated for chunks. 0B in use in bin. 0B client-requested in use in bin.
+2025-04-26 13:24:51.167895: I external/local_xla/xla/tsl/framework/bfc_allocator.cc:1065] Bin (1024): 	Total Chunks: 0, Chunks in use: 0. 0B allocated for chunks. 0B in use in bin. 0B client-requested in use in bin.
+2025-04-26 13:24:51.167900: I external/local_xla/xla/tsl/framework/bfc_allocator.cc:1065] Bin (2048): 	Total Chunks: 0, Chunks in use: 0. 0B allocated for chunks. 0B in use in bin. 0B client-requested in use in bin.
+2025-04-26 13:24:51.167905: I external/local_xla/xla/tsl/framework/bfc_allocator.cc:1065] Bin (4096): 	Total Chunks: 0, Chunks in use: 0. 0B allocated for chunks. 0B in use in bin. 0B client-requested in use in bin.
+2025-04-26 13:24:51.167910: I external/local_xla/xla/tsl/framework/bfc_allocator.cc:1065] Bin (8192): 	Total Chunks: 0, Chunks in use: 0. 0B allocated for chunks. 0B in use in bin. 0B client-requested in use in bin.
+2025-04-26 13:24:51.167915: I external/local_xla/xla/tsl/framework/bfc_allocator.cc:1065] Bin (16384): 	Total Chunks: 0, Chunks in use: 0. 0B allocated for chunks. 0B in use in bin. 0B client-requested in use in bin.
+2025-04-26 13:24:51.167920: I external/local_xla/xla/tsl/framework/bfc_allocator.cc:1065] Bin (32768): 	Total Chunks: 0, Chunks in use: 0. 0B allocated for chunks. 0B in use in bin. 0B client-requested in use in bin.
+2025-04-26 13:24:51.167926: I external/local_xla/xla/tsl/framework/bfc_allocator.cc:1065] Bin (65536): 	Total Chunks: 0, Chunks in use: 0. 0B allocated for chunks. 0B in use in bin. 0B client-requested in use in bin.
+2025-04-26 13:24:51.167931: I external/local_xla/xla/tsl/framework/bfc_allocator.cc:1065] Bin (131072): 	Total Chunks: 0, Chunks in use: 0. 0B allocated for chunks. 0B in use in bin. 0B client-requested in use in bin.
+2025-04-26 13:24:51.167936: I external/local_xla/xla/tsl/framework/bfc_allocator.cc:1065] Bin (262144): 	Total Chunks: 0, Chunks in use: 0. 0B allocated for chunks. 0B in use in bin. 0B client-requested in use in bin.
+2025-04-26 13:24:51.167941: I external/local_xla/xla/tsl/framework/bfc_allocator.cc:1065] Bin (524288): 	Total Chunks: 0, Chunks in use: 0. 0B allocated for chunks. 0B in use in bin. 0B client-requested in use in bin.
+2025-04-26 13:24:51.167947: I external/local_xla/xla/tsl/framework/bfc_allocator.cc:1065] Bin (1048576): 	Total Chunks: 0, Chunks in use: 0. 0B allocated for chunks. 0B in use in bin. 0B client-requested in use in bin.
+2025-04-26 13:24:51.167952: I external/local_xla/xla/tsl/framework/bfc_allocator.cc:1065] Bin (2097152): 	Total Chunks: 0, Chunks in use: 0. 0B allocated for chunks. 0B in use in bin. 0B client-requested in use in bin.
+2025-04-26 13:24:51.167957: I external/local_xla/xla/tsl/framework/bfc_allocator.cc:1065] Bin (4194304): 	Total Chunks: 0, Chunks in use: 0. 0B allocated for chunks. 0B in use in bin. 0B client-requested in use in bin.
+2025-04-26 13:24:51.167962: I external/local_xla/xla/tsl/framework/bfc_allocator.cc:1065] Bin (8388608): 	Total Chunks: 0, Chunks in use: 0. 0B allocated for chunks. 0B in use in bin. 0B client-requested in use in bin.
+2025-04-26 13:24:51.167967: I external/local_xla/xla/tsl/framework/bfc_allocator.cc:1065] Bin (16777216): 	Total Chunks: 0, Chunks in use: 0. 0B allocated for chunks. 0B in use in bin. 0B client-requested in use in bin.
+2025-04-26 13:24:51.167972: I external/local_xla/xla/tsl/framework/bfc_allocator.cc:1065] Bin (33554432): 	Total Chunks: 0, Chunks in use: 0. 0B allocated for chunks. 0B in use in bin. 0B client-requested in use in bin.
+2025-04-26 13:24:51.167977: I external/local_xla/xla/tsl/framework/bfc_allocator.cc:1065] Bin (67108864): 	Total Chunks: 0, Chunks in use: 0. 0B allocated for chunks. 0B in use in bin. 0B client-requested in use in bin.
+2025-04-26 13:24:51.167982: I external/local_xla/xla/tsl/framework/bfc_allocator.cc:1065] Bin (134217728): 	Total Chunks: 0, Chunks in use: 0. 0B allocated for chunks. 0B in use in bin. 0B client-requested in use in bin.
+2025-04-26 13:24:51.167987: I external/local_xla/xla/tsl/framework/bfc_allocator.cc:1065] Bin (268435456): 	Total Chunks: 0, Chunks in use: 0. 0B allocated for chunks. 0B in use in bin. 0B client-requested in use in bin.
+2025-04-26 13:24:51.167994: I external/local_xla/xla/tsl/framework/bfc_allocator.cc:1081] Bin for 19.92GiB was 256.00MiB, Chunk State: 
+2025-04-26 13:24:51.167998: I external/local_xla/xla/tsl/framework/bfc_allocator.cc:1119]      Summary of in-use Chunks by size: 
+2025-04-26 13:24:51.168002: I external/local_xla/xla/tsl/framework/bfc_allocator.cc:1126] Sum Total of in-use chunks: 0B
+2025-04-26 13:24:51.168044: I external/local_xla/xla/tsl/framework/bfc_allocator.cc:1128] Total bytes in pool: 0 memory_limit_: 527630336 available bytes: 527630336 curr_region_allocation_bytes_: 2097152
+2025-04-26 13:24:51.168054: I external/local_xla/xla/tsl/framework/bfc_allocator.cc:1133] Stats: 
+Limit:                       527630336
+InUse:                               0
+MaxInUse:                            0
+NumAllocs:                           0
+MaxAllocSize:                        0
+Reserved:                            0
+PeakReserved:                        0
+LargestFreeBlock:                    0
+
+2025-04-26 13:24:51.168066: W external/local_xla/xla/tsl/framework/bfc_allocator.cc:512] <allocator contains no memory>
+Traceback (most recent call last):
+  File "/home/uceerjp/StiegerModel/EEGNet/ShallowConvNet.py", line 112, in <module>
+    train_dataset = prepare_data_for_model(train_trials, encoder, batch_size=32, shuffle=True)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/uceerjp/StiegerModel/EEGNet/ShallowConvNet.py", line 57, in prepare_data_for_model
+    dataset = tf.data.Dataset.from_tensor_slices((data, labels_oh))
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/uceerjp/.conda/envs/eegenv/lib/python3.11/site-packages/tensorflow/python/data/ops/dataset_ops.py", line 827, in from_tensor_slices
+    return from_tensor_slices_op._from_tensor_slices(tensors, name)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/uceerjp/.conda/envs/eegenv/lib/python3.11/site-packages/tensorflow/python/data/ops/from_tensor_slices_op.py", line 25, in _from_tensor_slices
+    return _TensorSliceDataset(tensors, name=name)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/uceerjp/.conda/envs/eegenv/lib/python3.11/site-packages/tensorflow/python/data/ops/from_tensor_slices_op.py", line 33, in __init__
+    element = structure.normalize_element(element)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/uceerjp/.conda/envs/eegenv/lib/python3.11/site-packages/tensorflow/python/data/util/structure.py", line 134, in normalize_element
+    ops.convert_to_tensor(t, name="component_%d" % i, dtype=dtype))
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/uceerjp/.conda/envs/eegenv/lib/python3.11/site-packages/tensorflow/python/profiler/trace.py", line 183, in wrapped
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/uceerjp/.conda/envs/eegenv/lib/python3.11/site-packages/tensorflow/python/framework/ops.py", line 736, in convert_to_tensor
+    return tensor_conversion_registry.convert(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/uceerjp/.conda/envs/eegenv/lib/python3.11/site-packages/tensorflow/python/framework/tensor_conversion_registry.py", line 234, in convert
+    ret = conversion_func(value, dtype=dtype, name=name, as_ref=as_ref)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/uceerjp/.conda/envs/eegenv/lib/python3.11/site-packages/tensorflow/python/framework/constant_tensor_conversion.py", line 29, in _constant_tensor_conversion_function
+    return constant_op.constant(v, dtype=dtype, name=name)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/uceerjp/.conda/envs/eegenv/lib/python3.11/site-packages/tensorflow/python/ops/weak_tensor_ops.py", line 142, in wrapper
+    return op(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/home/uceerjp/.conda/envs/eegenv/lib/python3.11/site-packages/tensorflow/python/framework/constant_op.py", line 276, in constant
+    return _constant_impl(value, dtype, shape, name, verify_shape=False,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/uceerjp/.conda/envs/eegenv/lib/python3.11/site-packages/tensorflow/python/framework/constant_op.py", line 289, in _constant_impl
+    return _constant_eager_impl(ctx, value, dtype, shape, verify_shape)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/uceerjp/.conda/envs/eegenv/lib/python3.11/site-packages/tensorflow/python/framework/constant_op.py", line 301, in _constant_eager_impl
+    t = convert_to_eager_tensor(value, ctx, dtype)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/uceerjp/.conda/envs/eegenv/lib/python3.11/site-packages/tensorflow/python/framework/constant_op.py", line 108, in convert_to_eager_tensor
+    return ops.EagerTensor(value, ctx.device_name, dtype)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tensorflow.python.framework.errors_impl.InternalError: Failed copying input tensor from /job:localhost/replica:0/task:0/device:CPU:0 to /job:localhost/replica:0/task:0/device:GPU:0 in order to run _EagerConst: Dst tensor is not initialized.
+[RESTART] Script crashed or ended at Sat 26 Apr 13:25:18 BST 2025, retrying in 60s...
+[START] Training at Sat 26 Apr 13:28:06 BST 2025 on GPU 8
+2025-04-26 13:28:14.864969: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2025-04-26 13:28:15.799356: E external/local_xla/xla/stream_executor/cuda/cuda_fft.cc:467] Unable to register cuFFT factory: Attempting to register factory for plugin cuFFT when one has already been registered
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+E0000 00:00:1745670496.380072 1344483 cuda_dnn.cc:8579] Unable to register cuDNN factory: Attempting to register factory for plugin cuDNN when one has already been registered
+E0000 00:00:1745670496.733965 1344483 cuda_blas.cc:1407] Unable to register cuBLAS factory: Attempting to register factory for plugin cuBLAS when one has already been registered
+W0000 00:00:1745670498.126703 1344483 computation_placer.cc:177] computation placer already registered. Please check linkage and avoid linking the same target more than once.
+W0000 00:00:1745670498.126742 1344483 computation_placer.cc:177] computation placer already registered. Please check linkage and avoid linking the same target more than once.
+W0000 00:00:1745670498.126745 1344483 computation_placer.cc:177] computation placer already registered. Please check linkage and avoid linking the same target more than once.
+W0000 00:00:1745670498.126748 1344483 computation_placer.cc:177] computation placer already registered. Please check linkage and avoid linking the same target more than once.
+2025-04-26 13:28:18.305540: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX512F AVX512_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+Host RAM: 502.84 GB total, 189.07 GB used
+Starting Script...
+Loading EEG trials dataset ...
+Loaded dataset with 18015 trials from subjects: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+[INFO] Minimum time length found: 5040
+[INFO] All trials cropped to minimum time length.
+
+===== LOSO Iteration: Test Subject 1 =====
+I0000 00:00:1745670831.137016 1344483 gpu_device.cc:2019] Created device /job:localhost/replica:0/task:0/device:GPU:0 with 503 MB memory:  -> device: 0, name: Tesla V100-PCIE-32GB, pci bus id: 0000:c2:00.0, compute capability: 7.0
+2025-04-26 13:34:21.454899: W external/local_xla/xla/tsl/framework/bfc_allocator.cc:501] Allocator (GPU_0_bfc) ran out of memory trying to allocate 19.92GiB (rounded to 21391130880)requested by op _EagerConst
+If the cause is memory fragmentation maybe the environment variable 'TF_GPU_ALLOCATOR=cuda_malloc_async' will improve the situation. 
+Current allocation summary follows.
+Current allocation summary follows.
+2025-04-26 13:34:21.454929: I external/local_xla/xla/tsl/framework/bfc_allocator.cc:1058] BFCAllocator dump for GPU_0_bfc
+2025-04-26 13:34:21.454939: I external/local_xla/xla/tsl/framework/bfc_allocator.cc:1065] Bin (256): 	Total Chunks: 0, Chunks in use: 0. 0B allocated for chunks. 0B in use in bin. 0B client-requested in use in bin.
+2025-04-26 13:34:21.454952: I external/local_xla/xla/tsl/framework/bfc_allocator.cc:1065] Bin (512): 	Total Chunks: 0, Chunks in use: 0. 0B allocated for chunks. 0B in use in bin. 0B client-requested in use in bin.
+2025-04-26 13:34:21.454957: I external/local_xla/xla/tsl/framework/bfc_allocator.cc:1065] Bin (1024): 	Total Chunks: 0, Chunks in use: 0. 0B allocated for chunks. 0B in use in bin. 0B client-requested in use in bin.
+2025-04-26 13:34:21.454962: I external/local_xla/xla/tsl/framework/bfc_allocator.cc:1065] Bin (2048): 	Total Chunks: 0, Chunks in use: 0. 0B allocated for chunks. 0B in use in bin. 0B client-requested in use in bin.
+2025-04-26 13:34:21.454967: I external/local_xla/xla/tsl/framework/bfc_allocator.cc:1065] Bin (4096): 	Total Chunks: 0, Chunks in use: 0. 0B allocated for chunks. 0B in use in bin. 0B client-requested in use in bin.
+2025-04-26 13:34:21.454971: I external/local_xla/xla/tsl/framework/bfc_allocator.cc:1065] Bin (8192): 	Total Chunks: 0, Chunks in use: 0. 0B allocated for chunks. 0B in use in bin. 0B client-requested in use in bin.
+2025-04-26 13:34:21.454977: I external/local_xla/xla/tsl/framework/bfc_allocator.cc:1065] Bin (16384): 	Total Chunks: 0, Chunks in use: 0. 0B allocated for chunks. 0B in use in bin. 0B client-requested in use in bin.
+2025-04-26 13:34:21.454982: I external/local_xla/xla/tsl/framework/bfc_allocator.cc:1065] Bin (32768): 	Total Chunks: 0, Chunks in use: 0. 0B allocated for chunks. 0B in use in bin. 0B client-requested in use in bin.
+2025-04-26 13:34:21.454987: I external/local_xla/xla/tsl/framework/bfc_allocator.cc:1065] Bin (65536): 	Total Chunks: 0, Chunks in use: 0. 0B allocated for chunks. 0B in use in bin. 0B client-requested in use in bin.
+2025-04-26 13:34:21.454992: I external/local_xla/xla/tsl/framework/bfc_allocator.cc:1065] Bin (131072): 	Total Chunks: 0, Chunks in use: 0. 0B allocated for chunks. 0B in use in bin. 0B client-requested in use in bin.
+2025-04-26 13:34:21.454997: I external/local_xla/xla/tsl/framework/bfc_allocator.cc:1065] Bin (262144): 	Total Chunks: 0, Chunks in use: 0. 0B allocated for chunks. 0B in use in bin. 0B client-requested in use in bin.
+2025-04-26 13:34:21.455002: I external/local_xla/xla/tsl/framework/bfc_allocator.cc:1065] Bin (524288): 	Total Chunks: 0, Chunks in use: 0. 0B allocated for chunks. 0B in use in bin. 0B client-requested in use in bin.
+2025-04-26 13:34:21.455008: I external/local_xla/xla/tsl/framework/bfc_allocator.cc:1065] Bin (1048576): 	Total Chunks: 0, Chunks in use: 0. 0B allocated for chunks. 0B in use in bin. 0B client-requested in use in bin.
+2025-04-26 13:34:21.455013: I external/local_xla/xla/tsl/framework/bfc_allocator.cc:1065] Bin (2097152): 	Total Chunks: 0, Chunks in use: 0. 0B allocated for chunks. 0B in use in bin. 0B client-requested in use in bin.
+2025-04-26 13:34:21.455018: I external/local_xla/xla/tsl/framework/bfc_allocator.cc:1065] Bin (4194304): 	Total Chunks: 0, Chunks in use: 0. 0B allocated for chunks. 0B in use in bin. 0B client-requested in use in bin.
+2025-04-26 13:34:21.455023: I external/local_xla/xla/tsl/framework/bfc_allocator.cc:1065] Bin (8388608): 	Total Chunks: 0, Chunks in use: 0. 0B allocated for chunks. 0B in use in bin. 0B client-requested in use in bin.
+2025-04-26 13:34:21.455028: I external/local_xla/xla/tsl/framework/bfc_allocator.cc:1065] Bin (16777216): 	Total Chunks: 0, Chunks in use: 0. 0B allocated for chunks. 0B in use in bin. 0B client-requested in use in bin.
+2025-04-26 13:34:21.455033: I external/local_xla/xla/tsl/framework/bfc_allocator.cc:1065] Bin (33554432): 	Total Chunks: 0, Chunks in use: 0. 0B allocated for chunks. 0B in use in bin. 0B client-requested in use in bin.
+2025-04-26 13:34:21.455038: I external/local_xla/xla/tsl/framework/bfc_allocator.cc:1065] Bin (67108864): 	Total Chunks: 0, Chunks in use: 0. 0B allocated for chunks. 0B in use in bin. 0B client-requested in use in bin.
+2025-04-26 13:34:21.455043: I external/local_xla/xla/tsl/framework/bfc_allocator.cc:1065] Bin (134217728): 	Total Chunks: 0, Chunks in use: 0. 0B allocated for chunks. 0B in use in bin. 0B client-requested in use in bin.
+2025-04-26 13:34:21.455048: I external/local_xla/xla/tsl/framework/bfc_allocator.cc:1065] Bin (268435456): 	Total Chunks: 0, Chunks in use: 0. 0B allocated for chunks. 0B in use in bin. 0B client-requested in use in bin.
+2025-04-26 13:34:21.455055: I external/local_xla/xla/tsl/framework/bfc_allocator.cc:1081] Bin for 19.92GiB was 256.00MiB, Chunk State: 
+2025-04-26 13:34:21.455060: I external/local_xla/xla/tsl/framework/bfc_allocator.cc:1119]      Summary of in-use Chunks by size: 
+2025-04-26 13:34:21.455064: I external/local_xla/xla/tsl/framework/bfc_allocator.cc:1126] Sum Total of in-use chunks: 0B
+2025-04-26 13:34:21.455069: I external/local_xla/xla/tsl/framework/bfc_allocator.cc:1128] Total bytes in pool: 0 memory_limit_: 527630336 available bytes: 527630336 curr_region_allocation_bytes_: 2097152
+2025-04-26 13:34:21.455078: I external/local_xla/xla/tsl/framework/bfc_allocator.cc:1133] Stats: 
+Limit:                       527630336
+InUse:                               0
+MaxInUse:                            0
+NumAllocs:                           0
+MaxAllocSize:                        0
+Reserved:                            0
+PeakReserved:                        0
+LargestFreeBlock:                    0
+
+2025-04-26 13:34:21.455082: W external/local_xla/xla/tsl/framework/bfc_allocator.cc:512] <allocator contains no memory>
+Traceback (most recent call last):
+  File "/home/uceerjp/StiegerModel/EEGNet/ShallowConvNet.py", line 108, in <module>
+    train_dataset = prepare_data_for_model(train_trials, encoder, batch_size=32, shuffle=True)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/uceerjp/StiegerModel/EEGNet/ShallowConvNet.py", line 52, in prepare_data_for_model
+    dataset = tf.data.Dataset.from_tensor_slices((data, labels_oh))
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/uceerjp/.conda/envs/eegenv/lib/python3.11/site-packages/tensorflow/python/data/ops/dataset_ops.py", line 827, in from_tensor_slices
+    return from_tensor_slices_op._from_tensor_slices(tensors, name)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/uceerjp/.conda/envs/eegenv/lib/python3.11/site-packages/tensorflow/python/data/ops/from_tensor_slices_op.py", line 25, in _from_tensor_slices
+    return _TensorSliceDataset(tensors, name=name)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/uceerjp/.conda/envs/eegenv/lib/python3.11/site-packages/tensorflow/python/data/ops/from_tensor_slices_op.py", line 33, in __init__
+    element = structure.normalize_element(element)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/uceerjp/.conda/envs/eegenv/lib/python3.11/site-packages/tensorflow/python/data/util/structure.py", line 134, in normalize_element
+    ops.convert_to_tensor(t, name="component_%d" % i, dtype=dtype))
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/uceerjp/.conda/envs/eegenv/lib/python3.11/site-packages/tensorflow/python/profiler/trace.py", line 183, in wrapped
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/uceerjp/.conda/envs/eegenv/lib/python3.11/site-packages/tensorflow/python/framework/ops.py", line 736, in convert_to_tensor
+    return tensor_conversion_registry.convert(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/uceerjp/.conda/envs/eegenv/lib/python3.11/site-packages/tensorflow/python/framework/tensor_conversion_registry.py", line 234, in convert
+    ret = conversion_func(value, dtype=dtype, name=name, as_ref=as_ref)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/uceerjp/.conda/envs/eegenv/lib/python3.11/site-packages/tensorflow/python/framework/constant_tensor_conversion.py", line 29, in _constant_tensor_conversion_function
+    return constant_op.constant(v, dtype=dtype, name=name)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/uceerjp/.conda/envs/eegenv/lib/python3.11/site-packages/tensorflow/python/ops/weak_tensor_ops.py", line 142, in wrapper
+    return op(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/home/uceerjp/.conda/envs/eegenv/lib/python3.11/site-packages/tensorflow/python/framework/constant_op.py", line 276, in constant
+    return _constant_impl(value, dtype, shape, name, verify_shape=False,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/uceerjp/.conda/envs/eegenv/lib/python3.11/site-packages/tensorflow/python/framework/constant_op.py", line 289, in _constant_impl
+    return _constant_eager_impl(ctx, value, dtype, shape, verify_shape)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/uceerjp/.conda/envs/eegenv/lib/python3.11/site-packages/tensorflow/python/framework/constant_op.py", line 301, in _constant_eager_impl
+    t = convert_to_eager_tensor(value, ctx, dtype)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/uceerjp/.conda/envs/eegenv/lib/python3.11/site-packages/tensorflow/python/framework/constant_op.py", line 108, in convert_to_eager_tensor
+    return ops.EagerTensor(value, ctx.device_name, dtype)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tensorflow.python.framework.errors_impl.InternalError: Failed copying input tensor from /job:localhost/replica:0/task:0/device:CPU:0 to /job:localhost/replica:0/task:0/device:GPU:0 in order to run _EagerConst: Dst tensor is not initialized.
+[START] Training at Sat 26 Apr 14:13:30 BST 2025 on GPU 6
+Traceback (most recent call last):
+  File "/home/uceerjp/StiegerModel/EEGNet/ShallowConvNet.py", line 9, in <module>
+    import tensorflow as tf
+ModuleNotFoundError: No module named 'tensorflow'
+[RESTART] Script crashed or ended at Sat 26 Apr 14:13:30 BST 2025, retrying in 60s...
+[START] Training at Sat 26 Apr 14:13:55 BST 2025 on GPU 6
+2025-04-26 14:13:55.926388: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2025-04-26 14:13:55.943893: E external/local_xla/xla/stream_executor/cuda/cuda_fft.cc:467] Unable to register cuFFT factory: Attempting to register factory for plugin cuFFT when one has already been registered
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+E0000 00:00:1745673235.962536 1395364 cuda_dnn.cc:8579] Unable to register cuDNN factory: Attempting to register factory for plugin cuDNN when one has already been registered
+E0000 00:00:1745673235.968599 1395364 cuda_blas.cc:1407] Unable to register cuBLAS factory: Attempting to register factory for plugin cuBLAS when one has already been registered
+W0000 00:00:1745673235.983465 1395364 computation_placer.cc:177] computation placer already registered. Please check linkage and avoid linking the same target more than once.
+W0000 00:00:1745673235.983495 1395364 computation_placer.cc:177] computation placer already registered. Please check linkage and avoid linking the same target more than once.
+W0000 00:00:1745673235.983497 1395364 computation_placer.cc:177] computation placer already registered. Please check linkage and avoid linking the same target more than once.
+W0000 00:00:1745673235.983499 1395364 computation_placer.cc:177] computation placer already registered. Please check linkage and avoid linking the same target more than once.
+2025-04-26 14:13:55.987852: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX512F AVX512_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+Host RAM: 502.84 GB total, 227.06 GB used
+Starting Script...
+Loading EEG trials dataset ...
+Loaded dataset with 18015 trials from subjects: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+[INFO] Minimum time length found: 5040
+[INFO] All trials cropped to minimum time length.
+
+===== LOSO Iteration: Test Subject 1 =====
+Traceback (most recent call last):
+  File "/home/uceerjp/StiegerModel/EEGNet/ShallowConvNet.py", line 108, in <module>
+    train_dataset = prepare_data_for_model(train_trials, encoder, batch_size=8, shuffle=True)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/uceerjp/StiegerModel/EEGNet/ShallowConvNet.py", line 52, in prepare_data_for_model
+    dataset = tf.data.Dataset.from_tensor_slices((data, labels_oh))
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/uceerjp/.conda/envs/eegenv/lib/python3.11/site-packages/tensorflow/python/data/ops/dataset_ops.py", line 827, in from_tensor_slices
+    return from_tensor_slices_op._from_tensor_slices(tensors, name)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/uceerjp/.conda/envs/eegenv/lib/python3.11/site-packages/tensorflow/python/data/ops/from_tensor_slices_op.py", line 25, in _from_tensor_slices
+    return _TensorSliceDataset(tensors, name=name)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/uceerjp/.conda/envs/eegenv/lib/python3.11/site-packages/tensorflow/python/data/ops/from_tensor_slices_op.py", line 33, in __init__
+    element = structure.normalize_element(element)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/uceerjp/.conda/envs/eegenv/lib/python3.11/site-packages/tensorflow/python/data/util/structure.py", line 134, in normalize_element
+    ops.convert_to_tensor(t, name="component_%d" % i, dtype=dtype))
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/uceerjp/.conda/envs/eegenv/lib/python3.11/site-packages/tensorflow/python/profiler/trace.py", line 183, in wrapped
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/uceerjp/.conda/envs/eegenv/lib/python3.11/site-packages/tensorflow/python/framework/ops.py", line 736, in convert_to_tensor
+    return tensor_conversion_registry.convert(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/uceerjp/.conda/envs/eegenv/lib/python3.11/site-packages/tensorflow/python/framework/tensor_conversion_registry.py", line 234, in convert
+    ret = conversion_func(value, dtype=dtype, name=name, as_ref=as_ref)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/uceerjp/.conda/envs/eegenv/lib/python3.11/site-packages/tensorflow/python/framework/constant_tensor_conversion.py", line 29, in _constant_tensor_conversion_function
+    return constant_op.constant(v, dtype=dtype, name=name)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/uceerjp/.conda/envs/eegenv/lib/python3.11/site-packages/tensorflow/python/ops/weak_tensor_ops.py", line 142, in wrapper
+    return op(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/home/uceerjp/.conda/envs/eegenv/lib/python3.11/site-packages/tensorflow/python/framework/constant_op.py", line 276, in constant
+    return _constant_impl(value, dtype, shape, name, verify_shape=False,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/uceerjp/.conda/envs/eegenv/lib/python3.11/site-packages/tensorflow/python/framework/constant_op.py", line 289, in _constant_impl
+    return _constant_eager_impl(ctx, value, dtype, shape, verify_shape)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/uceerjp/.conda/envs/eegenv/lib/python3.11/site-packages/tensorflow/python/framework/constant_op.py", line 301, in _constant_eager_impl
+    t = convert_to_eager_tensor(value, ctx, dtype)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/uceerjp/.conda/envs/eegenv/lib/python3.11/site-packages/tensorflow/python/framework/constant_op.py", line 96, in convert_to_eager_tensor
+    value = value.copy()
+            ^^^^^^^^^^^^
+numpy.core._exceptions._ArrayMemoryError: Unable to allocate 19.9 GiB for an array with shape (17114, 62, 5040, 1) and data type float32
+[RESTART] Script crashed or ended at Sat 26 Apr 14:18:24 BST 2025, retrying in 60s...

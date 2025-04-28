@@ -198,9 +198,9 @@ class LMDA(nn.Module):
 
 #%% LOSO LMDA Training (100 Epochs, No Session Splitting)
 
-data_dir = r'C:\Users\uceerjp\Desktop\PhD\Multi-session Data\OG_Full_Data'
-#data_dir = r'/home/uceerjp/Multi-sessionData/OG_Full_Data' ##  Server Directory
+from torch.utils.data import TensorDataset, DataLoader
 
+data_dir = r'C:\Users\uceerjp\Desktop\PhD\Multi-session Data\OG_Full_Data'
 subject_numbers = [1, 2, 5, 9, 21, 31, 34, 39]
 fs = 256
 
@@ -209,53 +209,51 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"Using device: {device}")
 
 batch_size = 32
-num_epochs = 100
+num_epochs = 25       # ← train only 25 epochs now
 learning_rate = 0.001
 
 for test_subject in subject_numbers:
     print(f"\n===== LOSO Iteration: Test Subject {test_subject} =====")
-    train_data_list = []
-    train_labels_list = []
+    train_data_list, train_labels_list = [], []
     
-    # Gather training data from all subjects except the test subject
+    # Gather training data (all except test_subject)
     for subj in subject_numbers:
         if subj == test_subject:
             continue
-        data_subj, labels_subj = load_and_preprocess_subject_LMDA(subj, data_dir, fs, chunk_duration_sec=3)
+        data_subj, labels_subj = load_and_preprocess_subject_LMDA(
+            subj, data_dir, fs, chunk_duration_sec=3
+        )
         train_data_list.append(data_subj)
         train_labels_list.append(labels_subj)
     
-    # Concatenate training data across subjects
     train_data_np = np.concatenate(train_data_list, axis=0)
     train_labels_np = np.concatenate(train_labels_list, axis=0)
     
-    # Load test subject's data (entire dataset)
-    test_data_np, test_labels_np = load_and_preprocess_subject_LMDA(test_subject, data_dir, fs, chunk_duration_sec=3)
+    # Load test subject's data
+    test_data_np, test_labels_np = load_and_preprocess_subject_LMDA(
+        test_subject, data_dir, fs, chunk_duration_sec=3
+    )
     
-    print(f"Training on {train_data_np.shape[0]} trials from subjects: {[s for s in subject_numbers if s != test_subject]}")
-    print(f"Testing on {test_data_np.shape[0]} trials from subject: {test_subject}")
+    print(f"Training on {train_data_np.shape[0]} trials from subjects "
+          f"{[s for s in subject_numbers if s != test_subject]}")
+    print(f"Testing on {test_data_np.shape[0]} trials from subject {test_subject}")
     
-    # Convert to torch tensors
+    # Convert to tensors
     train_data_tensor = torch.tensor(train_data_np, dtype=torch.float32)
-    test_data_tensor = torch.tensor(test_data_np, dtype=torch.float32)
-    # Convert one-hot labels to class indices
-    train_labels_indices = torch.tensor(np.argmax(train_labels_np, axis=1), dtype=torch.long)
-    test_labels_indices = torch.tensor(np.argmax(test_labels_np, axis=1), dtype=torch.long)
+    test_data_tensor  = torch.tensor(test_data_np,  dtype=torch.float32)
+    train_labels_idx  = torch.tensor(train_labels_np.argmax(axis=1), dtype=torch.long)
+    test_labels_idx   = torch.tensor(test_labels_np.argmax(axis=1),  dtype=torch.long)
     
-    # Create DataLoaders with batch size 32
-    from torch.utils.data import TensorDataset, DataLoader
-    train_dataset = TensorDataset(train_data_tensor, train_labels_indices)
-    test_dataset = TensorDataset(test_data_tensor, test_labels_indices)
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
-    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
+    train_ds = TensorDataset(train_data_tensor, train_labels_idx)
+    test_ds  = TensorDataset(test_data_tensor,  test_labels_idx)
+    train_loader = DataLoader(train_ds, batch_size=batch_size, shuffle=True)
+    test_loader  = DataLoader(test_ds,  batch_size=batch_size, shuffle=False)
     
-    # Track RAM usage before model creation
+    # RAM usage before model
     ram_before = get_ram_usage()
     
-    # Determine input dimensions for LMDA: (batch, 1, chans, samples)
+    # Init LMDA (expects input shape [batch, 1, chans, samples])
     _, _, chans, samples = train_data_tensor.shape
-    
-    # Initialize LMDA model
     model = LMDA(chans=chans, samples=samples, num_classes=2).to(device)
     
     optimizer = optim.Adam(model.parameters(), lr=learning_rate)
@@ -265,78 +263,66 @@ for test_subject in subject_numbers:
     ram_after = get_ram_usage()
     ram_model_usage = ram_after - ram_before
     
-    best_accuracy = 0
-    best_epoch = 0
-    total_inf_time = 0.0
-    start_train_time = time()
-    
+    # ----- Training -----
+    print(f"Training LMDA for {num_epochs} epochs...")
+    start_train = time()
+    model.train()
     for epoch in range(num_epochs):
-        model.train()
         running_loss = 0.0
-        for batch_data, batch_labels in train_loader:
-            batch_data = batch_data.to(device)
-            batch_labels = batch_labels.to(device)
-            
+        for x_batch, y_batch in train_loader:
+            x_batch, y_batch = x_batch.to(device), y_batch.to(device)
             optimizer.zero_grad()
-            outputs = model(batch_data)
-            loss = criterion(outputs, batch_labels)
+            outputs = model(x_batch)
+            loss = criterion(outputs, y_batch)
             loss.backward()
             optimizer.step()
-            
-            running_loss += loss.item() * batch_data.size(0)
-        
-        epoch_loss = running_loss / len(train_dataset)
-        
-        # Evaluation after each epoch
-        model.eval()
-        correct = 0
-        total = 0
-        epoch_inf_time = 0.0
-        with torch.no_grad():
-            for batch_data, batch_labels in test_loader:
-                batch_data = batch_data.to(device)
-                batch_labels = batch_labels.to(device)
-                start_inf = time()
-                outputs = model(batch_data)
-                epoch_inf_time += time() - start_inf
-                _, predicted = torch.max(outputs.data, 1)
-                total += batch_labels.size(0)
-                correct += (predicted == batch_labels).sum().item()
-        test_acc = correct / total
-        total_inf_time += epoch_inf_time
-        
-        if test_acc > best_accuracy:
-            best_accuracy = test_acc
-            best_epoch = epoch + 1
-        
-        print(f"Epoch {epoch+1}/{num_epochs}: Loss = {epoch_loss:.4f}, Test Accuracy = {test_acc*100:.2f}%, " 
-              f"Inference Time per trial = {epoch_inf_time/total:.4f} sec")
+            running_loss += loss.item() * x_batch.size(0)
+        avg_loss = running_loss / len(train_ds)
+        print(f"  Epoch {epoch+1}/{num_epochs}, Loss = {avg_loss:.4f}")
+    train_time = time() - start_train
     
-    total_train_time = time() - start_train_time
+    # ----- Single Evaluation -----
+    model.eval()
+    correct = 0
+    total = 0
+    inf_start = time()
+    with torch.no_grad():
+        for x_batch, y_batch in test_loader:
+            x_batch, y_batch = x_batch.to(device), y_batch.to(device)
+            outputs = model(x_batch)
+            _, preds = outputs.max(1)
+            correct += (preds == y_batch).sum().item()
+            total += y_batch.size(0)
+    inf_time = time() - inf_start
+    
+    test_acc = correct / total
+    inf_time_per_trial = inf_time / total
+    
+    # Store results
     results[f"Subject_{test_subject}"] = {
-        "train_time": total_train_time,
-        "best_accuracy": best_accuracy,
-        "best_epoch": best_epoch,
-        "inference_time_per_trial": total_inf_time / total,
+        "train_time": train_time,
+        "test_accuracy": test_acc,
+        "inference_time_per_trial": inf_time_per_trial,
         "model_parameters": num_model_parameters,
         "ram_model_usage": ram_model_usage,
     }
     
-    print(f"LOSO iteration for Test Subject {test_subject} complete.")
-    print(f"Train Time: {total_train_time:.2f} sec, Best Accuracy: {best_accuracy*100:.2f}% at Epoch {best_epoch}, "
-          f"Model Params: {num_model_parameters}, RAM Usage: {ram_model_usage:.2f} MB.")
+    print(f"Test Accuracy = {test_acc*100:.2f}%")
+    print(f"Inference Time per trial = {inf_time_per_trial:.4f} sec")
+    print(f"Training Time = {train_time:.2f} sec, "
+          f"Params = {num_model_parameters}, RAM = {ram_model_usage:.2f} MB")
     
-    # Clean up for next iteration
+    # Clean up
     del model, optimizer, train_loader, test_loader
     torch.cuda.empty_cache()
     gc.collect()
 
-# Print summary of results
+# ----- Summary -----
 print("\n===== LOSO Summary =====")
-for subj, res in results.items():
+for subj, r in results.items():
     print(f"{subj}:")
-    print(f"  Training Time: {res['train_time']:.2f} sec")
-    print(f"  Best Accuracy: {res['best_accuracy']*100:.2f}% at Epoch {res['best_epoch']}")
-    print(f"  Model Params: {res['model_parameters']}")
-    print(f"  RAM Model Usage: {res['ram_model_usage']:.2f} MB")
-    print(f"  Inference Time per trial: {res['inference_time_per_trial']:.4f} sec")
+    print(f"  Training Time: {r['train_time']:.2f} sec")
+    print(f"  Test Accuracy: {r['test_accuracy']*100:.2f}%")
+    print(f"  Model Params: {r['model_parameters']}")
+    print(f"  RAM Model Usage: {r['ram_model_usage']:.2f} MB")
+    print(f"  Inference Time per trial: {r['inference_time_per_trial']:.4f} sec")

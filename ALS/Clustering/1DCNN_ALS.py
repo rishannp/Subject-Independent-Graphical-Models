@@ -174,14 +174,15 @@ results = {}
 # Loop over each subject as test subject (LOSO)
 for test_subject in subject_numbers:
     print(f"\n===== LOSO Iteration: Test Subject {test_subject} =====")
-    train_data_list = []
-    train_labels_list = []
+    train_data_list, train_labels_list = [], []
     
     # Gather training data from all subjects except the test subject
     for subj in subject_numbers:
         if subj == test_subject:
             continue
-        data_subj, labels_subj = load_and_preprocess_subject(subj, data_dir, fs, chunk_duration_sec=640/fs)
+        data_subj, labels_subj = load_and_preprocess_subject(
+            subj, data_dir, fs, chunk_duration_sec=640/fs
+        )
         train_data_list.append(data_subj)
         train_labels_list.append(labels_subj)
     
@@ -189,63 +190,66 @@ for test_subject in subject_numbers:
     train_data = np.concatenate(train_data_list, axis=0)
     train_labels = np.concatenate(train_labels_list, axis=0)
     
-    # Load test subject's data (use entire data)
-    test_data, test_labels = load_and_preprocess_subject(test_subject, data_dir, fs, chunk_duration_sec=640/fs)
+    # Load test subject's data
+    test_data, test_labels = load_and_preprocess_subject(
+        test_subject, data_dir, fs, chunk_duration_sec=640/fs
+    )
     
-    print(f"Training on {train_data.shape[0]} trials from subjects: {[s for s in subject_numbers if s != test_subject]}")
-    print(f"Testing on {test_data.shape[0]} trials from subject: {test_subject}")
+    print(f"Training on {train_data.shape[0]} trials from subjects "
+          f"{[s for s in subject_numbers if s != test_subject]}")
+    print(f"Testing on {test_data.shape[0]} trials from subject {test_subject}")
     
     # Track RAM usage before model creation
     ram_before = get_ram_usage()
     
-    # For HopefullNet, the expected input shape is (samples, channels) i.e. (640, 2)
+    # HopefullNet expects input shape (samples, channels)
     inp_shape = (train_data.shape[1], train_data.shape[2])
     
     # Initialize HopefullNet
     model = HopefullNet(inp_shape=inp_shape)
-    model.build((None, inp_shape[0], inp_shape[1]))  # Build the model explicitly
+    model.build((None, inp_shape[0], inp_shape[1]))
     optimizer = Adam(learning_rate=0.001)
     model.compile(loss='categorical_crossentropy', optimizer=optimizer, metrics=['accuracy'])
-    num_model_parameters = model.count_params()  # Now this works without error
-
+    
     num_model_parameters = model.count_params()
     ram_after = get_ram_usage()
     ram_model_usage = ram_after - ram_before
     
-    best_accuracy = 0
-    subject_results = {'train_time': 0, 'best_accuracy': 0, 'inference_time_per_trial': 0,
-                       'model_parameters': num_model_parameters, 'ram_model_usage': ram_model_usage}
-    
     print(f"Training HopefullNet for LOSO iteration with Test Subject {test_subject}...")
     start_train_time = time()
     
-    epochs = 100
-    for epoch in range(epochs):
-        print(f"Epoch {epoch+1}/{epochs}")
-        model.fit(train_data, train_labels, batch_size=32, epochs=1, verbose=2)
-        
-        # Evaluate every epoch
-        start_inf = time()
-        probs = model.predict(test_data)
-        inf_time = time() - start_inf
-        preds = probs.argmax(axis=-1)
-        test_acc = np.mean(preds == test_labels.argmax(axis=-1))
-        if test_acc > best_accuracy:
-            best_accuracy = test_acc
-        print(f"Epoch {epoch+1}: Test Accuracy = {test_acc:.4f}, Inference Time per trial = {inf_time / test_data.shape[0]:.4f} sec")
-    
+    # Train for 25 epochs in one go
+    epochs = 25
+    model.fit(
+        train_data, train_labels,
+        batch_size=32,
+        epochs=epochs,
+        verbose=2
+    )
     total_train_time = time() - start_train_time
-    subject_results['train_time'] = total_train_time
-    subject_results['best_accuracy'] = best_accuracy
-    subject_results['inference_time_per_trial'] = inf_time / test_data.shape[0]
     
-    results[f'Subject_{test_subject}'] = subject_results
+    # Single evaluation after training
+    start_inf = time()
+    probs = model.predict(test_data, verbose=0)
+    inf_time = time() - start_inf
+    preds = probs.argmax(axis=-1)
+    test_acc = np.mean(preds == test_labels.argmax(axis=-1))
     
-    print(f"LOSO iteration for Test Subject {test_subject} complete.")
-    print(f"Train Time: {total_train_time:.2f} sec, Best Accuracy: {best_accuracy*100:.2f}%, "
+    # Store results
+    results[f'Subject_{test_subject}'] = {
+        'train_time': total_train_time,
+        'test_accuracy': test_acc,
+        'inference_time_per_trial': inf_time / test_data.shape[0],
+        'model_parameters': num_model_parameters,
+        'ram_model_usage': ram_model_usage
+    }
+    
+    print(f"Test Accuracy = {test_acc:.4f}")
+    print(f"Inference Time per trial = {inf_time / test_data.shape[0]:.4f} sec")
+    print(f"Training Time: {total_train_time:.2f} sec, "
           f"Model Params: {num_model_parameters}, RAM Usage: {ram_model_usage:.2f} MB.")
     
-    # Clear session and garbage collect to free up memory between iterations.
+    # Clear session and free memory
     tf.keras.backend.clear_session()
     gc.collect()
 
@@ -254,7 +258,8 @@ print("\n===== LOSO Summary =====")
 for subj, res in results.items():
     print(f"{subj}:")
     print(f"  Training Time: {res['train_time']:.2f} sec")
-    print(f"  Best Accuracy: {res['best_accuracy']*100:.2f}%")
+    print(f"  Test Accuracy: {res['test_accuracy']*100:.2f}%")
     print(f"  Model Params: {res['model_parameters']}")
     print(f"  RAM Model Usage: {res['ram_model_usage']:.2f} MB")
     print(f"  Inference Time per trial: {res['inference_time_per_trial']:.4f} sec")
+

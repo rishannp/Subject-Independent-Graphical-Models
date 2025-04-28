@@ -1,0 +1,649 @@
+[START] Training at Mon 28 Apr 13:07:41 BST 2025 on GPU 9
+
+--- Test Subject 1 ---
+/home/uceerjp/.conda/envs/eegenv/lib/python3.11/site-packages/torch/cuda/__init__.py:262: UserWarning: 
+    Found GPU0 Tesla V100-PCIE-32GB which is of cuda capability 7.0.
+    PyTorch no longer supports this GPU because it is too old.
+    The minimum cuda capability supported by this library is 7.5.
+    
+  warnings.warn(
+Traceback (most recent call last):
+  File "/home/uceerjp/StiegerModel/FTL/FTL.py", line 302, in <module>
+    acc = transfer_SPD_batch(cov1, cov2, lab1, lab2, batch_size=32)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/uceerjp/StiegerModel/FTL/FTL.py", line 245, in transfer_SPD_batch
+    for (xb1, yb1), (xb2, yb2) in zip(loader1, loader2):
+  File "/home/uceerjp/.conda/envs/eegenv/lib/python3.11/site-packages/torch/utils/data/dataloader.py", line 733, in __next__
+    data = self._next_data()
+           ^^^^^^^^^^^^^^^^^
+  File "/home/uceerjp/.conda/envs/eegenv/lib/python3.11/site-packages/torch/utils/data/dataloader.py", line 789, in _next_data
+    data = self._dataset_fetcher.fetch(index)  # may raise StopIteration
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/uceerjp/.conda/envs/eegenv/lib/python3.11/site-packages/torch/utils/data/_utils/fetch.py", line 55, in fetch
+    return self.collate_fn(data)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/uceerjp/.conda/envs/eegenv/lib/python3.11/site-packages/torch/utils/data/_utils/collate.py", line 398, in default_collate
+    return collate(batch, collate_fn_map=default_collate_fn_map)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/uceerjp/.conda/envs/eegenv/lib/python3.11/site-packages/torch/utils/data/_utils/collate.py", line 211, in collate
+    return [
+           ^
+  File "/home/uceerjp/.conda/envs/eegenv/lib/python3.11/site-packages/torch/utils/data/_utils/collate.py", line 212, in <listcomp>
+    collate(samples, collate_fn_map=collate_fn_map)
+  File "/home/uceerjp/.conda/envs/eegenv/lib/python3.11/site-packages/torch/utils/data/_utils/collate.py", line 155, in collate
+    return collate_fn_map[elem_type](batch, collate_fn_map=collate_fn_map)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/uceerjp/.conda/envs/eegenv/lib/python3.11/site-packages/torch/utils/data/_utils/collate.py", line 272, in collate_tensor_fn
+    return torch.stack(batch, 0, out=out)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: CUDA error: no kernel image is available for execution on the device
+CUDA kernel errors might be asynchronously reported at some other API call, so the stacktrace below might be incorrect.
+For debugging consider passing CUDA_LAUNCH_BLOCKING=1
+Compile with `TORCH_USE_CUDA_DSA` to enable device-side assertions.
+
+[RESTART] Script crashed or ended at Mon 28 Apr 13:09:40 BST 2025, retrying in 60s...
+[START] Training at Mon 28 Apr 13:10:40 BST 2025 on GPU 9
+[START] Training at Mon 28 Apr 13:12:49 BST 2025 on GPU 9
+
+--- Test Subject 1 ---
+Iter 1/25 done.
+Iter 2/25 done.
+Iter 3/25 done.
+Iter 4/25 done.
+Iter 5/25 done.
+Iter 6/25 done.
+Iter 7/25 done.
+Iter 8/25 done.
+Iter 9/25 done.
+Iter 10/25 done.
+Iter 11/25 done.
+Iter 12/25 done.
+Iter 13/25 done.
+Iter 14/25 done.
+Iter 15/25 done.
+Iter 16/25 done.
+Iter 17/25 done.
+Iter 18/25 done.
+Iter 19/25 done.
+Iter 20/25 done.
+Iter 21/25 done.
+Iter 22/25 done.
+Iter 23/25 done.
+Iter 24/25 done.
+Iter 25/25 done.
+Target Test Acc: 0.4979
+Checkpoint saved for Subject_1.
+
+--- Test Subject 2 ---
+Iter 1/25 done.
+Iter 2/25 done.
+Iter 3/25 done.
+Iter 4/25 done.
+Iter 5/25 done.
+Iter 6/25 done.
+Iter 7/25 done.
+Iter 8/25 done.
+Iter 9/25 done.
+Iter 10/25 done.
+Iter 11/25 done.
+Iter 12/25 done.
+Iter 13/25 done.
+Iter 14/25 done.
+Iter 15/25 done.
+Iter 16/25 done.
+Iter 17/25 done.
+Iter 18/25 done.
+Iter 19/25 done.
+Iter 20/25 done.
+Iter 21/25 done.
+Iter 22/25 done.
+Iter 23/25 done.
+Iter 24/25 done.
+Iter 25/25 done.
+Target Test Acc: 0.5076
+Checkpoint saved for Subject_2.
+
+--- Test Subject 3 ---
+Iter 1/25 done.
+Iter 2/25 done.
+Iter 3/25 done.
+Iter 4/25 done.
+Iter 5/25 done.
+Iter 6/25 done.
+Iter 7/25 done.
+Iter 8/25 done.
+Iter 9/25 done.
+Iter 10/25 done.
+Iter 11/25 done.
+Iter 12/25 done.
+Iter 13/25 done.
+Iter 14/25 done.
+Iter 15/25 done.
+Iter 16/25 done.
+Iter 17/25 done.
+Iter 18/25 done.
+Iter 19/25 done.
+Iter 20/25 done.
+Iter 21/25 done.
+Iter 22/25 done.
+Iter 23/25 done.
+Iter 24/25 done.
+Iter 25/25 done.
+Target Test Acc: 0.5007
+Checkpoint saved for Subject_3.
+
+--- Test Subject 4 ---
+Iter 1/25 done.
+Iter 2/25 done.
+Iter 3/25 done.
+Iter 4/25 done.
+Iter 5/25 done.
+Iter 6/25 done.
+Iter 7/25 done.
+Iter 8/25 done.
+Iter 9/25 done.
+Iter 10/25 done.
+Iter 11/25 done.
+Iter 12/25 done.
+Iter 13/25 done.
+Iter 14/25 done.
+Iter 15/25 done.
+Iter 16/25 done.
+Iter 17/25 done.
+Iter 18/25 done.
+Iter 19/25 done.
+Iter 20/25 done.
+Iter 21/25 done.
+Iter 22/25 done.
+Iter 23/25 done.
+Iter 24/25 done.
+Iter 25/25 done.
+Target Test Acc: 0.5920
+Checkpoint saved for Subject_4.
+
+--- Test Subject 5 ---
+Iter 1/25 done.
+Iter 2/25 done.
+Iter 3/25 done.
+Iter 4/25 done.
+Iter 5/25 done.
+Iter 6/25 done.
+Iter 7/25 done.
+Iter 8/25 done.
+Iter 9/25 done.
+Iter 10/25 done.
+Iter 11/25 done.
+Iter 12/25 done.
+Iter 13/25 done.
+Iter 14/25 done.
+Iter 15/25 done.
+Iter 16/25 done.
+Iter 17/25 done.
+Iter 18/25 done.
+Iter 19/25 done.
+Iter 20/25 done.
+Iter 21/25 done.
+Iter 22/25 done.
+Iter 23/25 done.
+Iter 24/25 done.
+Iter 25/25 done.
+Target Test Acc: 0.5243
+Checkpoint saved for Subject_5.
+
+--- Test Subject 6 ---
+Iter 1/25 done.
+Iter 2/25 done.
+Iter 3/25 done.
+Iter 4/25 done.
+Iter 5/25 done.
+Iter 6/25 done.
+Iter 7/25 done.
+Iter 8/25 done.
+Iter 9/25 done.
+Iter 10/25 done.
+Iter 11/25 done.
+Iter 12/25 done.
+Iter 13/25 done.
+Iter 14/25 done.
+Iter 15/25 done.
+Iter 16/25 done.
+Iter 17/25 done.
+Iter 18/25 done.
+Iter 19/25 done.
+Iter 20/25 done.
+Iter 21/25 done.
+Iter 22/25 done.
+Iter 23/25 done.
+Iter 24/25 done.
+Iter 25/25 done.
+Target Test Acc: 0.5277
+Checkpoint saved for Subject_6.
+
+--- Test Subject 7 ---
+Iter 1/25 done.
+Iter 2/25 done.
+Iter 3/25 done.
+Iter 4/25 done.
+Iter 5/25 done.
+Iter 6/25 done.
+Iter 7/25 done.
+Iter 8/25 done.
+Iter 9/25 done.
+Iter 10/25 done.
+Iter 11/25 done.
+Iter 12/25 done.
+Iter 13/25 done.
+Iter 14/25 done.
+Iter 15/25 done.
+Iter 16/25 done.
+Iter 17/25 done.
+Iter 18/25 done.
+Iter 19/25 done.
+Iter 20/25 done.
+Iter 21/25 done.
+Iter 22/25 done.
+Iter 23/25 done.
+Iter 24/25 done.
+Iter 25/25 done.
+Target Test Acc: 0.4917
+Checkpoint saved for Subject_7.
+
+--- Test Subject 8 ---
+Iter 1/25 done.
+Iter 2/25 done.
+Iter 3/25 done.
+Iter 4/25 done.
+Iter 5/25 done.
+Iter 6/25 done.
+Iter 7/25 done.
+Iter 8/25 done.
+Iter 9/25 done.
+Iter 10/25 done.
+Iter 11/25 done.
+Iter 12/25 done.
+Iter 13/25 done.
+Iter 14/25 done.
+Iter 15/25 done.
+Iter 16/25 done.
+Iter 17/25 done.
+Iter 18/25 done.
+Iter 19/25 done.
+Iter 20/25 done.
+Iter 21/25 done.
+Iter 22/25 done.
+Iter 23/25 done.
+Iter 24/25 done.
+Iter 25/25 done.
+Target Test Acc: 0.5346
+Checkpoint saved for Subject_8.
+
+--- Test Subject 9 ---
+Iter 1/25 done.
+Iter 2/25 done.
+Iter 3/25 done.
+Iter 4/25 done.
+Iter 5/25 done.
+Iter 6/25 done.
+Iter 7/25 done.
+Iter 8/25 done.
+Iter 9/25 done.
+Iter 10/25 done.
+Iter 11/25 done.
+Iter 12/25 done.
+Iter 13/25 done.
+Iter 14/25 done.
+Iter 15/25 done.
+Iter 16/25 done.
+Iter 17/25 done.
+Iter 18/25 done.
+Iter 19/25 done.
+Iter 20/25 done.
+Iter 21/25 done.
+Iter 22/25 done.
+Iter 23/25 done.
+Iter 24/25 done.
+Iter 25/25 done.
+Target Test Acc: 0.4993
+Checkpoint saved for Subject_9.
+
+--- Test Subject 10 ---
+Iter 1/25 done.
+Iter 2/25 done.
+Iter 3/25 done.
+Iter 4/25 done.
+Iter 5/25 done.
+Iter 6/25 done.
+Iter 7/25 done.
+Iter 8/25 done.
+Iter 9/25 done.
+Iter 10/25 done.
+Iter 11/25 done.
+Iter 12/25 done.
+Iter 13/25 done.
+Iter 14/25 done.
+Iter 15/25 done.
+Iter 16/25 done.
+Iter 17/25 done.
+Iter 18/25 done.
+Iter 19/25 done.
+Iter 20/25 done.
+Iter 21/25 done.
+Iter 22/25 done.
+Iter 23/25 done.
+Iter 24/25 done.
+Iter 25/25 done.
+Target Test Acc: 0.5958
+Checkpoint saved for Subject_10.
+
+--- Test Subject 11 ---
+Iter 1/25 done.
+Iter 2/25 done.
+Iter 3/25 done.
+Iter 4/25 done.
+Iter 5/25 done.
+Iter 6/25 done.
+Iter 7/25 done.
+Iter 8/25 done.
+Iter 9/25 done.
+Iter 10/25 done.
+Iter 11/25 done.
+Iter 12/25 done.
+Iter 13/25 done.
+Iter 14/25 done.
+Iter 15/25 done.
+Iter 16/25 done.
+Iter 17/25 done.
+Iter 18/25 done.
+Iter 19/25 done.
+Iter 20/25 done.
+Iter 21/25 done.
+Iter 22/25 done.
+Iter 23/25 done.
+Iter 24/25 done.
+Iter 25/25 done.
+Target Test Acc: 0.5347
+Checkpoint saved for Subject_11.
+
+--- Test Subject 12 ---
+Iter 1/25 done.
+Iter 2/25 done.
+Iter 3/25 done.
+Iter 4/25 done.
+Iter 5/25 done.
+Iter 6/25 done.
+Iter 7/25 done.
+Iter 8/25 done.
+Iter 9/25 done.
+Iter 10/25 done.
+Iter 11/25 done.
+Iter 12/25 done.
+Iter 13/25 done.
+Iter 14/25 done.
+Iter 15/25 done.
+Iter 16/25 done.
+Iter 17/25 done.
+Iter 18/25 done.
+Iter 19/25 done.
+Iter 20/25 done.
+Iter 21/25 done.
+Iter 22/25 done.
+Iter 23/25 done.
+Iter 24/25 done.
+Iter 25/25 done.
+Target Test Acc: 0.4716
+Checkpoint saved for Subject_12.
+
+--- Test Subject 13 ---
+Iter 1/25 done.
+Iter 2/25 done.
+Iter 3/25 done.
+Iter 4/25 done.
+Iter 5/25 done.
+Iter 6/25 done.
+Iter 7/25 done.
+Iter 8/25 done.
+Iter 9/25 done.
+Iter 10/25 done.
+Iter 11/25 done.
+Iter 12/25 done.
+Iter 13/25 done.
+Iter 14/25 done.
+Iter 15/25 done.
+Iter 16/25 done.
+Iter 17/25 done.
+Iter 18/25 done.
+Iter 19/25 done.
+Iter 20/25 done.
+Iter 21/25 done.
+Iter 22/25 done.
+Iter 23/25 done.
+Iter 24/25 done.
+Iter 25/25 done.
+Target Test Acc: 0.4917
+Checkpoint saved for Subject_13.
+
+--- Test Subject 14 ---
+Iter 1/25 done.
+Iter 2/25 done.
+Iter 3/25 done.
+Iter 4/25 done.
+Iter 5/25 done.
+Iter 6/25 done.
+Iter 7/25 done.
+Iter 8/25 done.
+Iter 9/25 done.
+Iter 10/25 done.
+Iter 11/25 done.
+Iter 12/25 done.
+Iter 13/25 done.
+Iter 14/25 done.
+Iter 15/25 done.
+Iter 16/25 done.
+Iter 17/25 done.
+Iter 18/25 done.
+Iter 19/25 done.
+Iter 20/25 done.
+Iter 21/25 done.
+Iter 22/25 done.
+Iter 23/25 done.
+Iter 24/25 done.
+Iter 25/25 done.
+Target Test Acc: 0.5250
+Checkpoint saved for Subject_14.
+
+--- Test Subject 15 ---
+Iter 1/25 done.
+Iter 2/25 done.
+Iter 3/25 done.
+Iter 4/25 done.
+Iter 5/25 done.
+Iter 6/25 done.
+Iter 7/25 done.
+Iter 8/25 done.
+Iter 9/25 done.
+Iter 10/25 done.
+Iter 11/25 done.
+Iter 12/25 done.
+Iter 13/25 done.
+Iter 14/25 done.
+Iter 15/25 done.
+Iter 16/25 done.
+Iter 17/25 done.
+Iter 18/25 done.
+Iter 19/25 done.
+Iter 20/25 done.
+Iter 21/25 done.
+Iter 22/25 done.
+Iter 23/25 done.
+Iter 24/25 done.
+Iter 25/25 done.
+Target Test Acc: 0.5354
+Checkpoint saved for Subject_15.
+
+--- Test Subject 16 ---
+Iter 1/25 done.
+Iter 2/25 done.
+Iter 3/25 done.
+Iter 4/25 done.
+Iter 5/25 done.
+Iter 6/25 done.
+Iter 7/25 done.
+Iter 8/25 done.
+Iter 9/25 done.
+Iter 10/25 done.
+Iter 11/25 done.
+Iter 12/25 done.
+Iter 13/25 done.
+Iter 14/25 done.
+Iter 15/25 done.
+Iter 16/25 done.
+Iter 17/25 done.
+Iter 18/25 done.
+Iter 19/25 done.
+Iter 20/25 done.
+Iter 21/25 done.
+Iter 22/25 done.
+Iter 23/25 done.
+Iter 24/25 done.
+Iter 25/25 done.
+Target Test Acc: 0.5361
+Checkpoint saved for Subject_16.
+
+--- Test Subject 17 ---
+Iter 1/25 done.
+Iter 2/25 done.
+Iter 3/25 done.
+Iter 4/25 done.
+Iter 5/25 done.
+Iter 6/25 done.
+Iter 7/25 done.
+Iter 8/25 done.
+Iter 9/25 done.
+Iter 10/25 done.
+Iter 11/25 done.
+Iter 12/25 done.
+Iter 13/25 done.
+Iter 14/25 done.
+Iter 15/25 done.
+Iter 16/25 done.
+Iter 17/25 done.
+Iter 18/25 done.
+Iter 19/25 done.
+Iter 20/25 done.
+Iter 21/25 done.
+Iter 22/25 done.
+Iter 23/25 done.
+Iter 24/25 done.
+Iter 25/25 done.
+Target Test Acc: 0.5090
+Checkpoint saved for Subject_17.
+
+--- Test Subject 18 ---
+Iter 1/25 done.
+Iter 2/25 done.
+Iter 3/25 done.
+Iter 4/25 done.
+Iter 5/25 done.
+Iter 6/25 done.
+Iter 7/25 done.
+Iter 8/25 done.
+Iter 9/25 done.
+Iter 10/25 done.
+Iter 11/25 done.
+Iter 12/25 done.
+Iter 13/25 done.
+Iter 14/25 done.
+Iter 15/25 done.
+Iter 16/25 done.
+Iter 17/25 done.
+Iter 18/25 done.
+Iter 19/25 done.
+Iter 20/25 done.
+Iter 21/25 done.
+Iter 22/25 done.
+Iter 23/25 done.
+Iter 24/25 done.
+Iter 25/25 done.
+Target Test Acc: 0.5097
+Checkpoint saved for Subject_18.
+
+--- Test Subject 19 ---
+Iter 1/25 done.
+Iter 2/25 done.
+Iter 3/25 done.
+Iter 4/25 done.
+Iter 5/25 done.
+Iter 6/25 done.
+Iter 7/25 done.
+Iter 8/25 done.
+Iter 9/25 done.
+Iter 10/25 done.
+Iter 11/25 done.
+Iter 12/25 done.
+Iter 13/25 done.
+Iter 14/25 done.
+Iter 15/25 done.
+Iter 16/25 done.
+Iter 17/25 done.
+Iter 18/25 done.
+Iter 19/25 done.
+Iter 20/25 done.
+Iter 21/25 done.
+Iter 22/25 done.
+Iter 23/25 done.
+Iter 24/25 done.
+Iter 25/25 done.
+Target Test Acc: 0.4993
+Checkpoint saved for Subject_19.
+
+--- Test Subject 20 ---
+Iter 1/25 done.
+Iter 2/25 done.
+Iter 3/25 done.
+Iter 4/25 done.
+Iter 5/25 done.
+Iter 6/25 done.
+Iter 7/25 done.
+Iter 8/25 done.
+Iter 9/25 done.
+Iter 10/25 done.
+Iter 11/25 done.
+Iter 12/25 done.
+Iter 13/25 done.
+Iter 14/25 done.
+Iter 15/25 done.
+Iter 16/25 done.
+Iter 17/25 done.
+Iter 18/25 done.
+Iter 19/25 done.
+Iter 20/25 done.
+Iter 21/25 done.
+Iter 22/25 done.
+Iter 23/25 done.
+Iter 24/25 done.
+Iter 25/25 done.
+Target Test Acc: 0.4736
+Checkpoint saved for Subject_20.
+
+===== Final LOSO Summary =====
+Subject_1: 49.79%
+Subject_2: 50.76%
+Subject_3: 50.07%
+Subject_4: 59.20%
+Subject_5: 52.43%
+Subject_6: 52.77%
+Subject_7: 49.17%
+Subject_8: 53.46%
+Subject_9: 49.93%
+Subject_10: 59.58%
+Subject_11: 53.47%
+Subject_12: 47.16%
+Subject_13: 49.17%
+Subject_14: 52.50%
+Subject_15: 53.54%
+Subject_16: 53.61%
+Subject_17: 50.90%
+Subject_18: 50.97%
+Subject_19: 49.93%
+Subject_20: 47.36%
+[RESTART] Script crashed or ended at Mon 28 Apr 13:34:38 BST 2025, retrying in 60s...

@@ -5,7 +5,7 @@ import scipy.signal as sig
 from scipy.stats import zscore
 import psutil
 import gc
-import time
+from time import time
 
 import torch
 import torch.nn as nn
@@ -197,8 +197,6 @@ def evaluate(model, dataloader, device):
 
 #%% Main LOSO Training with MIN2Net in PyTorch (No Validation Set)
 data_dir = r'C:\Users\uceerjp\Desktop\PhD\Multi-session Data\OG_Full_Data'
-#data_dir = r'/home/uceerjp/Multi-sessionData/OG_Full_Data' ##  Server Directory
-
 subject_numbers = [39, 34, 31, 21, 9, 5, 2, 1]
 fs = 256
 
@@ -214,7 +212,9 @@ for test_subject in subject_numbers:
     for subj in subject_numbers:
         if subj == test_subject:
             continue
-        data_subj, labels_subj = load_and_preprocess_subject(subj, data_dir, fs, chunk_duration_sec=3)
+        data_subj, labels_subj = load_and_preprocess_subject(
+            subj, data_dir, fs, chunk_duration_sec=3
+        )
         train_data_list.append(data_subj)
         train_labels_list.append(labels_subj)
     
@@ -222,59 +222,57 @@ for test_subject in subject_numbers:
     train_labels = np.concatenate(train_labels_list, axis=0)
     
     # Load test subject's data
-    test_data, test_labels = load_and_preprocess_subject(test_subject, data_dir, fs, chunk_duration_sec=3)
+    test_data, test_labels = load_and_preprocess_subject(
+        test_subject, data_dir, fs, chunk_duration_sec=3
+    )
     
-    print(f"Training on {train_data.shape[0]} trials from subjects: {[s for s in subject_numbers if s != test_subject]}")
+    print(f"Training on {train_data.shape[0]} trials from subjects "
+          f"{[s for s in subject_numbers if s != test_subject]}")
     print(f"Testing on {test_data.shape[0]} trials from subject: {test_subject}")
     
-    # MIN2Net expects input shape (D, T, C); our data is (trials, electrodes, samples, 1).
-    # We transpose it to (trials, 1, samples, electrodes).
+    # MIN2Net expects (trials, 1, samples, electrodes)
     train_data_pt = np.transpose(train_data, (0, 3, 2, 1))
-    test_data_pt = np.transpose(test_data, (0, 3, 2, 1))
+    test_data_pt  = np.transpose(test_data,  (0, 3, 2, 1))
     
-    # Create PyTorch datasets
     X_train_tensor = torch.tensor(train_data_pt, dtype=torch.float32)
     y_train_tensor = torch.tensor(train_labels, dtype=torch.long)
-    X_test_tensor = torch.tensor(test_data_pt, dtype=torch.float32)
-    y_test_tensor = torch.tensor(test_labels, dtype=torch.long)
+    X_test_tensor  = torch.tensor(test_data_pt,  dtype=torch.float32)
+    y_test_tensor  = torch.tensor(test_labels,  dtype=torch.long)
     
     train_dataset = TensorDataset(X_train_tensor, y_train_tensor)
-    test_dataset = TensorDataset(X_test_tensor, y_test_tensor)
+    test_dataset  = TensorDataset(X_test_tensor,  y_test_tensor)
+    train_loader  = DataLoader(train_dataset, batch_size=32, shuffle=True)
+    test_loader   = DataLoader(test_dataset,  batch_size=32, shuffle=False)
     
-    train_loader = DataLoader(train_dataset, batch_size=100, shuffle=True)
-    test_loader = DataLoader(test_dataset, batch_size=100, shuffle=False)
-    
-    # Determine input shape from training data: (D, T, C)
     input_shape = (X_train_tensor.shape[1], X_train_tensor.shape[2], X_train_tensor.shape[3])
     print(f"MIN2Net Input Shape (PyTorch): {input_shape}")
     
-    # Initialize model and optimizer
-    model = MIN2Net_PyTorch(input_shape=input_shape, num_class=2).to(device)
+    model     = MIN2Net_PyTorch(input_shape=input_shape, num_class=2).to(device)
     optimizer = optim.Adam(model.parameters(), lr=1e-3)
     
-    # Training loop: 100 epochs, evaluate after each epoch on test set,
-    # and log the highest testing accuracy
-    num_epochs = 100
-    best_test_acc = 0.0
-    best_epoch = -1
-    start_train = time.time()
+    # TRAIN for 25 epochs, no testing inside loop
+    num_epochs = 25
+    start_train = time()
     for epoch in range(num_epochs):
         epoch_loss = 0.0
         for inputs, labels in train_loader:
             loss = train_step(model, optimizer, inputs, labels, device)
             epoch_loss += loss
         avg_loss = epoch_loss / len(train_loader)
-        test_loss, test_acc = evaluate(model, test_loader, device)
-        if test_acc > best_test_acc:
-            best_test_acc = test_acc
-            best_epoch = epoch + 1
-        print(f"Epoch {epoch+1}/{num_epochs}, Loss: {avg_loss:.4f}, Test Loss: {test_loss:.4f}, Test Acc: {test_acc:.4f}, Best Test Acc: {best_test_acc:.4f} (Epoch {best_epoch})")
-    total_train_time = time.time() - start_train
+        print(f"Epoch {epoch+1}/{num_epochs}, Training Loss: {avg_loss:.4f}")
     
-    results[f'Subject_{test_subject}'] = {'train_time': total_train_time,
-                                           'best_test_accuracy': best_test_acc,
-                                           'best_epoch': best_epoch}
-    print(f"Final Evaluation for Subject {test_subject}: Accuracy = {best_test_acc*100:.2f}%")
+    total_train_time = time() - start_train
+    
+    # SINGLE evaluation pass after all training
+    test_loss, test_acc = evaluate(model, test_loader, device)
+    print(f"Final Evaluation for Subject {test_subject}: Test Loss = {test_loss:.4f}, "
+          f"Test Accuracy = {test_acc:.4f}")
+    
+    results[f'Subject_{test_subject}'] = {
+        'train_time': total_train_time,
+        'test_loss': test_loss,
+        'test_accuracy': test_acc
+    }
     
     if torch.cuda.is_available():
         torch.cuda.empty_cache()

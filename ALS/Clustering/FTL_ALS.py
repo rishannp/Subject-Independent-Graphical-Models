@@ -350,81 +350,64 @@ def transfer_SPD(cov_data_1, cov_data_2, labels_1, labels_2):
     Trains the Federated Transfer Learning model using the source domain (cov_data_1)
     and target domain (cov_data_2). The labels should be one-dimensional arrays.
     """
+    # Shuffle source and target
     cov_data_1, labels_1 = shuffle_data(cov_data_1, labels_1)
     cov_data_2, labels_2 = shuffle_data(cov_data_2, labels_2)
     print("Data shapes:", cov_data_1.shape, cov_data_2.shape)
-    target_train_frac = 0.2  # Change this value to control the target split
-    train_data_1_num = cov_data_1.shape[0]
-    cov_data_train_1 = cov_data_1  # All source data is used for training
-    train_data_2_num = int(np.floor(cov_data_2.shape[0] * target_train_frac))
-    cov_data_train_2 = cov_data_2[:train_data_2_num, :, :]
-    cov_data_test_2  = cov_data_2[train_data_2_num:, :, :]
-    print('Target training samples:', train_data_2_num)
-    print('Target testing samples:', labels_2.shape[0] - train_data_2_num)
-    print('-------------------------------------------------------')
+
+    # Split target into train/test
+    target_train_frac = 0.2
+    n_target = cov_data_2.shape[0]
+    n_train_2 = int(np.floor(n_target * target_train_frac))
     
-    data_train_1 = torch.from_numpy(cov_data_train_1).double()
-    data_train_2 = torch.from_numpy(cov_data_train_2).double()
-    data_test_2  = torch.from_numpy(cov_data_test_2).double()
+    # Prepare tensors
+    data_train_1 = torch.from_numpy(cov_data_1).double()
+    data_train_2 = torch.from_numpy(cov_data_2[:n_train_2]).double()
+    data_test_2  = torch.from_numpy(cov_data_2[n_train_2:]).double()
     
     target_train_1 = torch.LongTensor(labels_1)
-    target_train_2 = torch.LongTensor(labels_2[:train_data_2_num])
-    target_test_2  = torch.LongTensor(labels_2[train_data_2_num:])
+    target_train_2 = torch.LongTensor(labels_2[:n_train_2])
+    target_test_2  = torch.LongTensor(labels_2[n_train_2:])
     
+    # Instantiate models and MMD
     model_1 = SPDNetwork()
     model_2 = SPDNetwork()
+    mmd     = MMD('rbf', kernel_mul=2.0)
     
-    best_test_acc = 0.0  # Variable to store highest test accuracy found
-    old_loss = 0
-    lr_val, lr_1, lr_2 = 0.1, 0.1, 0.1
-    
-    for iteration in range(100):
+    # Learning-rate parameters
+    lr_val, lr_1, lr_2 = 0.001, 0.001, 0.001
+
+    # ----- Train for 25 iterations -----
+    for iteration in range(25):
         output_1, feat_1 = model_1(data_train_1)
         output_2, feat_2 = model_2(data_train_2)
+
+        # classification losses
+        loss = F.nll_loss(output_1, target_train_1) \
+             + F.nll_loss(output_2, target_train_2)
         
-        feat_1_positive, feat_1_negative = split_class_feat(feat_1, target_train_1)
-        feat_2_positive, feat_2_negative = split_class_feat(feat_2, target_train_2)
-        
-        mmd = MMD('rbf', kernel_mul=2.0)
-        loss = F.nll_loss(output_1, target_train_1) + F.nll_loss(output_2, target_train_2)
-        loss += mmd(feat_1_positive, feat_2_positive) + mmd(feat_1_negative, feat_2_negative)
-        
+        # add MMD between positive / negative features
+        f1_pos, f1_neg = split_class_feat(feat_1, target_train_1)
+        f2_pos, f2_neg = split_class_feat(feat_2, target_train_2)
+        loss += mmd(f1_pos, f2_pos) + mmd(f1_neg, f2_neg)
+
         loss.backward()
         model_1.update_manifold_reduction_layer(lr_1)
         model_2.update_manifold_reduction_layer(lr_2)
-        
-        average_grad = (model_1.fc_w.grad.data + model_2.fc_w.grad.data) / 2
-        model_1.update_federated_layer(lr_val, average_grad)
-        model_2.update_federated_layer(lr_val, average_grad)
-        
-        # Evaluate performance on training and target test set
-        if iteration % 1 == 0:
-            pred_1 = output_1.data.max(1, keepdim=True)[1]
-            pred_2 = output_2.data.max(1, keepdim=True)[1]
-            train_accuracy_1 = pred_1.eq(target_train_1.data.view_as(pred_1)).sum().float() / pred_1.shape[0]
-            train_accuracy_2 = pred_2.eq(target_train_2.data.view_as(pred_2)).sum().float() / pred_2.shape[0]
-            print(f"Iteration {iteration}: Source Train Acc: {train_accuracy_1:.4f}, Target Train Acc: {train_accuracy_2:.4f}")
-            
-            logits_2, _ = model_2(data_test_2)
-            output_test = F.log_softmax(logits_2, dim=-1)
-            loss_test = F.nll_loss(output_test, target_test_2)
-            pred_test = output_test.data.max(1, keepdim=True)[1]
-            test_accuracy = pred_test.eq(target_test_2.data.view_as(pred_test)).sum().float() / pred_test.shape[0]
-            print(f"Target Test Acc: {test_accuracy:.4f}")
-            
-            # Update best test accuracy if current test_accuracy is higher
-            if test_accuracy > best_test_acc:
-                best_test_acc = test_accuracy
-        
-        if np.abs(loss.item() - old_loss) < 1e-4:
-            break
-        old_loss = loss.item()
-        if iteration % 50 == 0:
-            lr_val = max(0.98 * lr_val, 0.01)
-            lr_1 = max(0.98 * lr_1, 0.01)
-            lr_2 = max(0.98 * lr_2, 0.01)
-    
-    return best_test_acc.item()
+        avg_grad = (model_1.fc_w.grad.data + model_2.fc_w.grad.data) / 2
+        model_1.update_federated_layer(lr_val, avg_grad)
+        model_2.update_federated_layer(lr_val, avg_grad)
+
+        print(f"Iteration {iteration+1}/25, train loss = {loss.item():.4f}")
+
+    # ----- Single final evaluation on target test set -----
+    logits_2, _ = model_2(data_test_2)
+    output_test = F.log_softmax(logits_2, dim=-1)
+    pred_test   = output_test.data.max(1, keepdim=True)[1]
+    test_acc    = pred_test.eq(target_test_2.view_as(pred_test)).sum().float() / pred_test.shape[0]
+    print(f"Final Target Test Accuracy = {test_acc:.4f}")
+
+    return test_acc.item()
 
 
 #%% LOSO FTL Training using Your Dataset

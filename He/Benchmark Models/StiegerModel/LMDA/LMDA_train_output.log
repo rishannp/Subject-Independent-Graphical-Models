@@ -1,0 +1,83 @@
+[START] Training at Mon 28 Apr 12:28:05 BST 2025 on GPU 0
+[INFO] Starting LMDA LOSO Training...
+Loaded 18015 trials from subjects: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+Using device: cpu
+
+--- Testing Subject 1 ---
+[START] Training at Mon 28 Apr 12:43:30 BST 2025 on GPU 9
+[INFO] Starting LMDA LOSO Training...
+Loaded 18015 trials from subjects: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+Using device: cuda
+
+--- Testing Subject 1 ---
+Traceback (most recent call last):
+  File "/home/uceerjp/StiegerModel/LMDA/LMDA.py", line 216, in <module>
+    model = LMDA(chans=chans, samples=samples).to(device)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/uceerjp/StiegerModel/LMDA/LMDA.py", line 107, in __init__
+    out = self.time_conv(out)
+          ^^^^^^^^^^^^^^^^^^^
+  File "/home/uceerjp/.conda/envs/eegenv/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1751, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/uceerjp/.conda/envs/eegenv/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1762, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/uceerjp/.conda/envs/eegenv/lib/python3.11/site-packages/torch/nn/modules/container.py", line 240, in forward
+    input = module(input)
+            ^^^^^^^^^^^^^
+  File "/home/uceerjp/.conda/envs/eegenv/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1751, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/uceerjp/.conda/envs/eegenv/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1762, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/uceerjp/.conda/envs/eegenv/lib/python3.11/site-packages/torch/nn/modules/conv.py", line 554, in forward
+    return self._conv_forward(input, self.weight, self.bias)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/uceerjp/.conda/envs/eegenv/lib/python3.11/site-packages/torch/nn/modules/conv.py", line 549, in _conv_forward
+    return F.conv2d(
+           ^^^^^^^^^
+RuntimeError: Calculated padded input size per channel: (5040 x 62). Kernel size: (1 x 75). Kernel size can't be greater than actual input size
+[RESTART] Script crashed or ended at Mon 28 Apr 12:45:05 BST 2025, retrying in 60s...
+[START] Training at Mon 28 Apr 12:48:41 BST 2025 on GPU 8
+[INFO] Starting LMDA LOSO Training...
+Loaded 18015 trials from subjects: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+Using device: cuda
+
+--- Testing Subject 1 ---
+/home/uceerjp/.conda/envs/eegenv/lib/python3.11/site-packages/torch/cuda/__init__.py:262: UserWarning: 
+    Found GPU0 Tesla V100-PCIE-32GB which is of cuda capability 7.0.
+    PyTorch no longer supports this GPU because it is too old.
+    The minimum cuda capability supported by this library is 7.5.
+    
+  warnings.warn(
+Training for 25 epochs...
+Traceback (most recent call last):
+  File "/home/uceerjp/StiegerModel/LMDA/LMDA.py", line 212, in <module>
+    logits = model(xb)
+             ^^^^^^^^^
+  File "/home/uceerjp/.conda/envs/eegenv/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1751, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/uceerjp/.conda/envs/eegenv/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1762, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/uceerjp/StiegerModel/LMDA/LMDA.py", line 124, in forward
+    x = torch.einsum('bdcw, hdc->bhcw', x, self.channel_weight)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/uceerjp/.conda/envs/eegenv/lib/python3.11/site-packages/torch/functional.py", line 422, in einsum
+    return _VF.einsum(equation, operands)  # type: ignore[attr-defined]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: CUDA error: no kernel image is available for execution on the device
+CUDA kernel errors might be asynchronously reported at some other API call, so the stacktrace below might be incorrect.
+For debugging consider passing CUDA_LAUNCH_BLOCKING=1
+Compile with `TORCH_USE_CUDA_DSA` to enable device-side assertions.
+
+[RESTART] Script crashed or ended at Mon 28 Apr 12:52:26 BST 2025, retrying in 60s...
+[START] Training at Mon 28 Apr 12:53:26 BST 2025 on GPU 8
+[INFO] Starting LMDA LOSO Training...
+Loaded 18015 trials from subjects: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+Using device: cuda
+
+--- Testing Subject 1 ---

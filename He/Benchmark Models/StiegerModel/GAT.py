@@ -47,13 +47,13 @@ class SimpleGAT(nn.Module):
         x, edge_index, batch = data.x, data.edge_index, data.batch
 
         x = F.relu(self.gn1(self.conv1(x, edge_index)))
-        #x = F.dropout(x, p=self.dropout, training=self.training)
+        # x = F.dropout(x, p=self.dropout, training=self.training)
 
         x = F.relu(self.gn2(self.conv2(x, edge_index)))
-        #x = F.dropout(x, p=self.dropout, training=self.training)
+        # x = F.dropout(x, p=self.dropout, training=self.training)
 
         x = F.relu(self.gn3(self.conv3(x, edge_index)))
-        #x = F.dropout(x, p=self.dropout, training=self.training)
+        # x = F.dropout(x, p=self.dropout, training=self.training)
 
         x = global_mean_pool(x, batch)
         features = x
@@ -125,7 +125,7 @@ for test_subject in tqdm(subject_numbers, desc="LOSO folds"):
         model.train()
         total_loss = 0.0
 
-        # — training loop —
+        # training loop
         for batch in train_loader:
             batch = batch.to(device)
             optimizer.zero_grad()
@@ -138,11 +138,11 @@ for test_subject in tqdm(subject_numbers, desc="LOSO folds"):
             total_loss += loss.item()
 
         avg_loss = total_loss / len(train_loader)
-        # I’m printing just the loss each epoch now
+        # I'm printing just the loss each epoch now
         print(f"Subject {test_subject}, Epoch {epoch+1}/{num_epochs}, "
               f"Loss: {avg_loss:.4f}", flush=True)
 
-    # — After all epochs, do a single test pass —
+    # After all epochs, do a single test pass
     model.eval()
     correct = 0
     total = 0
@@ -156,7 +156,7 @@ for test_subject in tqdm(subject_numbers, desc="LOSO folds"):
 
     final_test_acc = correct / total if total > 0 else 0.0
 
-    print(f"[RESULT] Subject {test_subject} - Final Accuracy: "
+    print(f"[RESULT] Subject {test_subject} : Final Accuracy: "
           f"{final_test_acc*100:.2f}%", flush=True)
 
     # Optionally save best model weights if you want:

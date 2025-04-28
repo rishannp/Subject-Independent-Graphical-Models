@@ -1,0 +1,46 @@
+[START] Training at Mon 28 Apr 00:28:26 BST 2025 on GPU 9
+[INFO] Starting MIN2Net LOSO Training...
+[INFO] Loaded 18015 trials from 20 subjects.
+
+===== LOSO: Test Subject 1 =====
+/home/uceerjp/.conda/envs/eegenv/lib/python3.11/site-packages/torch/cuda/__init__.py:262: UserWarning: 
+    Found GPU0 Tesla V100-PCIE-32GB which is of cuda capability 7.0.
+    PyTorch no longer supports this GPU because it is too old.
+    The minimum cuda capability supported by this library is 7.5.
+    
+  warnings.warn(
+/home/uceerjp/.conda/envs/eegenv/lib/python3.11/site-packages/torch/nn/modules/conv.py:549: UserWarning: Using padding='same' with even kernel lengths and odd dilation may require a zero-padded copy of the input be created (Triggered internally at /pytorch/aten/src/ATen/native/Convolution.cpp:1036.)
+  return F.conv2d(
+Traceback (most recent call last):
+  File "/home/uceerjp/StiegerModel/MIN2NET/MIN2Net.py", line 195, in <module>
+    loss = train_step(model, optimizer, inputs, labels, device)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/uceerjp/StiegerModel/MIN2NET/MIN2Net.py", line 99, in train_step
+    rec, latent, logits = model(inputs.to(device))
+                          ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/uceerjp/.conda/envs/eegenv/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1751, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/uceerjp/.conda/envs/eegenv/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1762, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/uceerjp/StiegerModel/MIN2NET/MIN2Net.py", line 72, in forward
+    x = F.elu(self.conv1(x))
+              ^^^^^^^^^^^^^
+  File "/home/uceerjp/.conda/envs/eegenv/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1751, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/uceerjp/.conda/envs/eegenv/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1762, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/uceerjp/.conda/envs/eegenv/lib/python3.11/site-packages/torch/nn/modules/conv.py", line 554, in forward
+    return self._conv_forward(input, self.weight, self.bias)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/uceerjp/.conda/envs/eegenv/lib/python3.11/site-packages/torch/nn/modules/conv.py", line 549, in _conv_forward
+    return F.conv2d(
+           ^^^^^^^^^
+RuntimeError: CUDA error: no kernel image is available for execution on the device
+CUDA kernel errors might be asynchronously reported at some other API call, so the stacktrace below might be incorrect.
+For debugging consider passing CUDA_LAUNCH_BLOCKING=1
+Compile with `TORCH_USE_CUDA_DSA` to enable device-side assertions.
+
