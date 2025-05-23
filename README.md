@@ -48,3 +48,12 @@ We demonstrate competitive or superior performance to seven baseline models on t
 > 📎 *Note*: Due to licensing, users must download raw datasets from original sources. Scripts to preprocess into PLV format are provided.
 
 ---
+
+If you use this work, please cite: 
+@inproceedings{patel2025,
+  title={Towards Calibration-Free Motor Imagery BCIs via Graph-Based Transfer Learning},
+  author={Patel, Rishan and Zhu, Ziyue and Bryson, Barney and Carlson, Tom and Jiang, Dai and Demosthenous, Andreas},
+  booktitle={IEEE Engineering in Medicine and Biology Society Neural Engineering Conference (NER)},
+  year={2025}
+}
+
